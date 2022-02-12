@@ -65,19 +65,23 @@ class TwoBitCanvas extends HTMLElement {
 
         const ctx = this.canvas.getContext('2d');
         const imageData = ctx.createImageData(WIDTH, HEIGHT);
+        this.imageData = imageData;
+        this.ctx = ctx;
 
-        const setPixel = (x, y, r, g, b) => {
-            const baseIndex = ((y * WIDTH) + x) * 4;
-            imageData.data[baseIndex] = r;
-            imageData.data[baseIndex+1] = g;
-            imageData.data[baseIndex+2] = b;
-            imageData.data[baseIndex+3] = 255; // alpha
-        };
         this.canvas.addEventListener('click', (event) => {
             const {x, y} = getMousePos(this.canvas, event);
-            setPixel(x, y, 0, 0, 0);
-            ctx.putImageData(imageData, 0, 0);
+            this.setPixel(x, y, 0);
         });
+    }
+
+    setPixel(x, y, v) {
+      const baseIndex = ((y * WIDTH) + x) * 4;
+      const [r, g, b] = colours[v];
+      this.imageData.data[baseIndex] = r;
+      this.imageData.data[baseIndex+1] = g;
+      this.imageData.data[baseIndex+2] = b;
+      this.imageData.data[baseIndex+3] = 255; // alpha
+      this.ctx.putImageData(this.imageData, 0, 0);
     }
 }
 
