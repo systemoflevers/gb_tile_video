@@ -5,15 +5,11 @@ canvas {
     width: 90vmin;
     height: auto;
     image-rendering: pixelated;
-    border-style: solid;  
+    //border-style: solid;  
   }
 </style>
 <canvas></canvas>
 `;
-
-
-const WIDTH = 160;
-const HEIGHT = 144;
 
 const colours = [[0,0,0], [85, 85, 85], [171,171,171], [255,255,255]];
 function convertCoordinate(point, origin, boundingLength, pixelLength) {
@@ -22,36 +18,7 @@ function convertCoordinate(point, origin, boundingLength, pixelLength) {
   return v;
 }
 
-function getMousePos(canvas, event) {
-    var rect = canvas.getBoundingClientRect();
-    return {
-        x: convertCoordinate(event.clientX, rect.left, rect.width, WIDTH),
-        y: convertCoordinate(event.clientY, rect.top, rect.height, HEIGHT)
-    };
-}
 
-function doStuff() {
-  const canvas = document.querySelector("canvas");
-  canvas.width = WIDTH;
-  canvas.height = HEIGHT
-  const ctx = canvas.getContext("2d");
-  const imageData = ctx.createImageData(WIDTH, HEIGHT);
-  
-  const setPixel = (x, y, r, g, b) => {
-    const baseIndex = ((y * WIDTH) + x) * 4;
-    imageData.data[baseIndex] = r;
-    imageData.data[baseIndex+1] = g;
-    imageData.data[baseIndex+2] = b;
-    imageData.data[baseIndex+3] = 255; // alpha
-  };
-  canvas.addEventListener('click', (event) => {
-    const {x, y} = getMousePos(canvas, event);
-    setPixel(x, y, 0, 0, 0);
-    ctx.putImageData(imageData, 0, 0);
-  });
-
-  return;
-}
 class TwoBitCanvas extends HTMLElement {
     constructor () {
         super();
@@ -60,28 +27,68 @@ class TwoBitCanvas extends HTMLElement {
         shadow.appendChild(template.content.cloneNode(true));
 
         this.canvas = shadow.querySelector('canvas');
-        this.canvas.width = WIDTH;
-        this.canvas.height = HEIGHT;
 
         const ctx = this.canvas.getContext('2d');
-        const imageData = ctx.createImageData(WIDTH, HEIGHT);
+        const imageData = ctx.createImageData(this.width, this.height);
         this.imageData = imageData;
         this.ctx = ctx;
+        this.updateDimensions();
 
         this.canvas.addEventListener('click', (event) => {
-            const {x, y} = getMousePos(this.canvas, event);
+            const {x, y} = this.getMousePos(this.canvas, event);
             this.setPixel(x, y, 0);
         });
     }
 
+    connectedCallback() {
+      console.log('connected', this.getAttribute('width'), this.height);
+    }
+
+    static get observedAttributes() { return ['width', 'height']; }
+    attributeChangedCallback(name, oldValue, newValue) {
+      if (oldValue === newValue) return;
+      console.log('change', name, oldValue, newValue, this[name]);
+      this.updateDimensions();
+    }
+
+    get height() {
+      return parseInt(this.getAttribute('height')) || 0;
+    }
+    set height(value) {
+      console.log('height setter');
+      this.setAttribute('height', value);
+    }
+
+    get width() {
+      return parseInt(this.getAttribute('width')) || 0;
+    }
+    set width(value) {
+      this.setAttribute('width', value);
+    }
+
+    updateDimensions() {
+      this.canvas.width = this.width;
+      this.canvas.height = this.height;
+      
+      this.imageData = this.ctx.createImageData(this.width, this.height);
+    }
+
     setPixel(x, y, v) {
-      const baseIndex = ((y * WIDTH) + x) * 4;
+      const baseIndex = ((y * this.width) + x) * 4;
       const [r, g, b] = colours[v];
       this.imageData.data[baseIndex] = r;
       this.imageData.data[baseIndex+1] = g;
       this.imageData.data[baseIndex+2] = b;
       this.imageData.data[baseIndex+3] = 255; // alpha
       this.ctx.putImageData(this.imageData, 0, 0);
+    }
+
+    getMousePos(canvas, event) {
+      var rect = canvas.getBoundingClientRect();
+      return {
+          x: convertCoordinate(event.clientX, rect.left, rect.width, this.width),
+          y: convertCoordinate(event.clientY, rect.top, rect.height, this.height)
+      };
     }
 }
 
