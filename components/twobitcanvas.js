@@ -21,7 +21,7 @@ function convertCoordinate(point, origin, boundingLength, pixelLength) {
 }
 
 
-class TwoBitCanvas extends HTMLElement {
+export class TwoBitCanvas extends HTMLElement {
     constructor () {
         super();
 
@@ -37,7 +37,7 @@ class TwoBitCanvas extends HTMLElement {
         this.updateDimensions();
 
         this.canvas.addEventListener('click', (event) => {
-            const {x, y} = this.getMousePos(this.canvas, event);
+            const {x, y} = this.getMousePos(event);
             this.setPixel(x, y, 0);
         });
     }
@@ -85,8 +85,8 @@ class TwoBitCanvas extends HTMLElement {
       this.ctx.putImageData(this.imageData, 0, 0);
     }
 
-    getMousePos(canvas, event) {
-      var rect = canvas.getBoundingClientRect();
+    getMousePos(event) {
+      const rect = this.canvas.getBoundingClientRect();
       return {
           x: convertCoordinate(event.clientX, rect.left, rect.width, this.width),
           y: convertCoordinate(event.clientY, rect.top, rect.height, this.height)
