@@ -7,9 +7,8 @@ template.innerHTML = `
   display: inline-block;
 }
 two-bit-canvas {
-    border-style: solid;
-    width: 90vmin;
-    height: auto;
+    cursor: crosshair;
+    width: 100%;
 }
 </style>
 <two-bit-canvas width="160" height="144"></two-bit-canvas>
