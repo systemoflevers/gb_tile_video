@@ -1,11 +1,13 @@
 const template = document.createElement('template');
 template.innerHTML = `
 <style>
+:host {
+  display: inline-block;
+}
+
 canvas {
-    width: 90vmin;
-    height: auto;
+    width: 100%;
     image-rendering: pixelated;
-    //border-style: solid;  
   }
 </style>
 <canvas></canvas>
