@@ -13,8 +13,25 @@ canvas {
 <canvas></canvas>
 `;
 
-const colours = [[0, 0, 0], [85, 85, 85], [171, 171, 171], [255, 255, 255]];
-
+const green_colours = [
+    [155, 188, 15],
+    [139, 172, 15],
+    [48, 98, 48],
+    [15, 56, 15],
+];
+const green2_colours = [
+    [224, 248, 208],
+    [136, 192, 112],
+    [52, 104, 86],
+    [8, 24, 32],
+]
+const grey_colours = [
+    [255,255, 255],
+    [171, 171, 171],
+    [85, 85, 85],
+    [0, 0, 0],
+];
+const colours = green2_colours;
 
 export class TwoBitCanvas extends HTMLElement {
     constructor() {
@@ -29,7 +46,9 @@ export class TwoBitCanvas extends HTMLElement {
         const imageData = ctx.createImageData(this.width, this.height);
         this.imageData = imageData;
         this.ctx = ctx;
+        this.colours = colours;
         this.updateDimensions();
+
     }
 
     connectedCallback() {
@@ -63,6 +82,19 @@ export class TwoBitCanvas extends HTMLElement {
         this.canvas.height = this.height;
 
         this.imageData = this.ctx.createImageData(this.width, this.height);
+        this.twoBitData = new Uint8Array(this.width * this.height);
+        this.redrawCanvas();
+    }
+
+    redrawCanvas() {
+        for (let i = 0; i < this.twoBitData.length; i++) {
+            const [r, g, b] = this.colours[this.twoBitData[i]];
+            this.imageData.data[i * 4] = r;
+            this.imageData.data[i * 4 + 1] = g;
+            this.imageData.data[i * 4 + 2] = b;
+            this.imageData.data[i * 4 + 3] = 255; // alpha
+        }
+        this.ctx.putImageData(this.imageData, 0, 0);
     }
 
     setPixel(x, y, v) {
