@@ -61,7 +61,7 @@ export class TwoBitDrawing extends HTMLElement {
         });
         this.lastPoint = null;
     }
-    
+
     drawLine(start, end) {
         this.twoBitCanvas.setPixel(start.x, start.y, this.colour);
         if (start.x === end.x) {
@@ -76,60 +76,67 @@ export class TwoBitDrawing extends HTMLElement {
         let prev = start;
         for (let i = 1; i <= Math.abs(end.x - start.x); i++) {
             const x = start.x + (xSign * i);
-            const y = Math.round(start.y + (xSign*i*slope));
+            const y = Math.round(start.y + (xSign * i * slope));
             const ySign = Math.sign(y - prev.y);
-            console.log( Math.abs(y - prev.y) - 1, prev, x, y, xSign, slope, i);
+            console.log(Math.abs(y - prev.y) - 1, prev, x, y, xSign, slope, i);
             for (let j = 0; j < Math.abs(y - prev.y); j++) {
                 console.log(prev, x, y, ySign, j, prev.x, prev.y + (ySign * j));
-                const altX = Math.round(prev.x + (ySign*j/slope));
+                const altX = Math.round(prev.x + (ySign * j / slope));
                 this.twoBitCanvas.setPixel(altX, prev.y + (ySign * j), this.colour);
             }
-            prev = {x, y};
+            prev = { x, y };
             this.twoBitCanvas.setPixel(x, y, this.colour);
         }
     }
 
     connectedCallback() {
-        this.twoBitCanvas.onpointerdown = (event) => {
-            const { x, y } = this.getMousePos(event);
-            this.twoBitCanvas.setPixel(x, y, this.colour);
-            this.lastPoint = {x, y};
-            this.twoBitCanvas.onpointermove = (event) => {
-                if (event.getCoalescedEvents) {
-                    const events = event.getCoalescedEvents();
-                    if (events.length > 0) {
-                        for (let e of events) {
-                            const { x, y } = this.getMousePos(event);
-                            if (this.lastPoint.x === x && this.lastPoint.y === y) {
-                                continue;
-                            }
-                            //this.twoBitCanvas.setPixel(x, y, this.colour);
-                            this.drawLine(this.lastPoint, {x, y});
-                            this.lastPoint = {x, y};
-                        }
-                        return;
-                    }
-                }
-                const { x, y } = this.getMousePos(event);
-                this.drawLine(this.lastPoint, {x, y});
-                this.lastPoint = {x, y};
-                //this.twoBitCanvas.setPixel(x, y, this.colour);
-            }
-        };
-        this.twoBitCanvas.onpointerup = (event) => {
-            const { x, y } = this.getMousePos(event);
-
-            this.drawLine(this.lastPoint, {x, y});
-            this.lastPoint = null;
-            //this.twoBitCanvas.setPixel(x, y, this.colour);
-            this.twoBitCanvas.onpointermove = null;
-        };
+        this.twoBitCanvas.onpointerdown = this.pointerDownHandler.bind(this);
+        this.twoBitCanvas.onpointerup = this.pointerUpHandler.bind(this);
 
         const draw = () => {
             this.twoBitCanvas.redrawCanvas();
             requestAnimationFrame(draw);
         };
         draw();
+    }
+
+    pointerDownHandler(ev) {
+        if (ev.button !== 0) return;
+        const { x, y } = this.getMousePos(ev);
+        this.twoBitCanvas.setPixel(x, y, this.colour);
+        this.lastPoint = { x, y };
+        this.twoBitCanvas.onpointermove = this.pointerMoveHandler.bind(this);
+    }
+
+    pointerUpHandler(ev) {
+        if (ev.button !== 0) return;
+        if (this.lastPoint === null) return;
+        const { x, y } = this.getMousePos(ev);
+
+        this.drawLine(this.lastPoint, { x, y });
+        this.lastPoint = null;
+        //this.twoBitCanvas.setPixel(x, y, this.colour);
+        this.twoBitCanvas.onpointermove = null;
+    }
+
+    pointerMoveHandler(event) {
+        if (event.getCoalescedEvents) {
+            const events = event.getCoalescedEvents();
+            if (events.length > 0) {
+                for (let e of events) {
+                    const { x, y } = this.getMousePos(event);
+                    if (this.lastPoint.x === x && this.lastPoint.y === y) {
+                        continue;
+                    }
+                    this.drawLine(this.lastPoint, { x, y });
+                    this.lastPoint = { x, y };
+                }
+                return;
+            }
+        }
+        const { x, y } = this.getMousePos(event);
+        this.drawLine(this.lastPoint, { x, y });
+        this.lastPoint = { x, y };
     }
 
     getMousePos(event) {
