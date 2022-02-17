@@ -9,6 +9,7 @@ template.innerHTML = `
 two-bit-canvas {
     cursor: crosshair;
     width: 100%;
+    touch-action: none;
 }
 #colour-picker div {
     width: 1em;
@@ -40,7 +41,7 @@ two-bit-canvas {
 
 function convertCoordinate(point, origin, boundingLength, pixelLength) {
     const v = Math.floor(((point - origin) / boundingLength) * pixelLength);
-    console.log(point, origin, boundingLength, pixelLength, (point - origin), v);
+    //console.log(point, origin, boundingLength, pixelLength, (point - origin), v);
     return v;
 }
 
@@ -58,32 +59,77 @@ export class TwoBitDrawing extends HTMLElement {
         pickerDiv.addEventListener('change', (event) => {
             this.colour = parseInt(event.target.value);
         });
+        this.lastPoint = null;
+    }
+    
+    drawLine(start, end) {
+        this.twoBitCanvas.setPixel(start.x, start.y, this.colour);
+        if (start.x === end.x) {
+            const [minY, maxY] = start.y < end.y ? [start.y, end.y] : [end.y, start.y];
+            for (let y = minY + 1; y <= maxY; y++) {
+                this.twoBitCanvas.setPixel(start.x, y, this.colour);
+            }
+            return;
+        }
+        const slope = (end.y - start.y) / (end.x - start.x);
+        const xSign = Math.sign(end.x - start.x);
+        let prev = start;
+        for (let i = 1; i <= Math.abs(end.x - start.x); i++) {
+            const x = start.x + (xSign * i);
+            const y = Math.round(start.y + (xSign*i*slope));
+            const ySign = Math.sign(y - prev.y);
+            console.log( Math.abs(y - prev.y) - 1, prev, x, y, xSign, slope, i);
+            for (let j = 0; j < Math.abs(y - prev.y); j++) {
+                console.log(prev, x, y, ySign, j, prev.x, prev.y + (ySign * j));
+                const altX = Math.round(prev.x + (ySign*j/slope));
+                this.twoBitCanvas.setPixel(altX, prev.y + (ySign * j), this.colour);
+            }
+            prev = {x, y};
+            this.twoBitCanvas.setPixel(x, y, this.colour);
+        }
     }
 
     connectedCallback() {
         this.twoBitCanvas.onpointerdown = (event) => {
             const { x, y } = this.getMousePos(event);
             this.twoBitCanvas.setPixel(x, y, this.colour);
+            this.lastPoint = {x, y};
             this.twoBitCanvas.onpointermove = (event) => {
                 if (event.getCoalescedEvents) {
                     const events = event.getCoalescedEvents();
                     if (events.length > 0) {
                         for (let e of events) {
                             const { x, y } = this.getMousePos(event);
-                            this.twoBitCanvas.setPixel(x, y, this.colour);
+                            if (this.lastPoint.x === x && this.lastPoint.y === y) {
+                                continue;
+                            }
+                            //this.twoBitCanvas.setPixel(x, y, this.colour);
+                            this.drawLine(this.lastPoint, {x, y});
+                            this.lastPoint = {x, y};
                         }
                         return;
                     }
                 }
                 const { x, y } = this.getMousePos(event);
-                this.twoBitCanvas.setPixel(x, y, this.colour);
+                this.drawLine(this.lastPoint, {x, y});
+                this.lastPoint = {x, y};
+                //this.twoBitCanvas.setPixel(x, y, this.colour);
             }
         };
         this.twoBitCanvas.onpointerup = (event) => {
             const { x, y } = this.getMousePos(event);
-            this.twoBitCanvas.setPixel(x, y, this.colour);
+
+            this.drawLine(this.lastPoint, {x, y});
+            this.lastPoint = null;
+            //this.twoBitCanvas.setPixel(x, y, this.colour);
             this.twoBitCanvas.onpointermove = null;
         };
+
+        const draw = () => {
+            this.twoBitCanvas.redrawCanvas();
+            requestAnimationFrame(draw);
+        };
+        draw();
     }
 
     getMousePos(event) {

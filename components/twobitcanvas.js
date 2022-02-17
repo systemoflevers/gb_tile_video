@@ -98,6 +98,11 @@ export class TwoBitCanvas extends HTMLElement {
     }
 
     setPixel(x, y, v) {
+        this.twoBitData[y * this.width + x] = v;
+    }
+
+    drawPixel(x, y, v) {
+        this.setPixel(x, y, v);
         const baseIndex = ((y * this.width) + x) * 4;
         const [r, g, b] = colours[v];
         this.imageData.data[baseIndex] = r;
