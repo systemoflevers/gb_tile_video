@@ -1,3 +1,5 @@
+import {ArrayBufferToBase64} from '../modules/data_conversion.js';
+
 const template = document.createElement('template');
 template.innerHTML = `
 <style>
@@ -110,6 +112,10 @@ export class TwoBitCanvas extends HTMLElement {
         this.imageData.data[baseIndex + 2] = b;
         this.imageData.data[baseIndex + 3] = 255; // alpha
         this.ctx.putImageData(this.imageData, 0, 0);
+    }
+
+    getB64ByteEncodedPixels() {
+        return ArrayBufferToBase64(this.twoBitData);
     }
 }
 
