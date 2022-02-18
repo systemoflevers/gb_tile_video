@@ -1,5 +1,12 @@
 two-bit-drawing {
+    --base-width: 60vmin;
+    --small-radius: calc(var(--base-width) * 0.054);
+    --big-radius: calc(var(--base-width) * 0.22);
     border-style: solid;
-    width: 90vmin;
+    border-color: grey;
+    border-width: calc(0.14*var(--base-width)) calc(0.29 * var(--base-width)) calc(0.14*var(--base-width)) calc(0.29 * var(--base-width));
+    border-radius: var(--small-radius);
+    border-bottom-right-radius: var(--big-radius);
+    width: var(--base-width);
     height: auto;
 }

@@ -11,9 +11,13 @@ two-bit-canvas {
     width: 100%;
     touch-action: none;
 }
+#colour-picker {
+    position: absolute;
+    margin-top: 5px;
+}
 #colour-picker div {
-    width: 1em;
-    height: 1em;
+    width: calc(0.1 * var(--base-width));
+    aspect-ratio: 1;
     display: inline-block;
 }
 #swatch-0 {
