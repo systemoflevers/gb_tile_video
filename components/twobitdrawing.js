@@ -5,6 +5,7 @@ template.innerHTML = `
 <style>
 :host {
   display: block;
+  position: relative;
 }
 two-bit-canvas {
     cursor: crosshair;
@@ -13,24 +14,48 @@ two-bit-canvas {
 }
 #colour-picker {
     position: absolute;
-    margin-top: 5px;
+    //margin-top: 5px;
+    width: 63%;
+}
+
+#colour-picker input {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+#colour-picker input:checked ~ label>div {
+    /*border-color: white;*/
+    /* border-style: solid; */
+    border-width: 4px;
+    padding-bottom: 0%;
+    /* border-color: white; */
+    margin-bottom: 3%;
+    
 }
 #colour-picker div {
-    width: calc(0.1 * var(--base-width));
+    //width: calc(0.1 * var(--base-width));
+    width: 10%;
     aspect-ratio: 1;
     display: inline-block;
+    //padding: 3px;
+    //box-sizing: border-box;
 }
 #swatch-0 {
     background-color: rgb(224, 248, 208);
+    border-color: rgb(52, 104, 86);
 }
 #swatch-1 {
     background-color: rgb(136, 192, 112);
+    border-color: rgb(8, 24, 32);
 }
 #swatch-2 {
     background-color: rgb(52, 104, 86);
+    border-color: rgb(224, 248, 208);
 }
 #swatch-3{
     background-color: rgb(8, 24, 32);
+    border-color: rgb(136, 192, 112);
 }
 </style>
 <two-bit-canvas width="160" height="144"></two-bit-canvas>

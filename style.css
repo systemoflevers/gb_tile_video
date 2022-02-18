@@ -1,18 +1,22 @@
 two-bit-drawing {
-    --base-width: 60vmin;
-    --small-radius: calc(var(--base-width) * 0.054);
-    --big-radius: calc(var(--base-width) * 0.22);
-    border-style: solid;
-    border-color: grey;
-    border-width: calc(0.14*var(--base-width)) calc(0.29 * var(--base-width)) calc(0.14*var(--base-width)) calc(0.29 * var(--base-width));
-    border-radius: var(--small-radius);
-    border-bottom-right-radius: var(--big-radius);
-    width: var(--base-width);
-    height: auto;
-    margin-left: auto;
-    margin-right: auto;
+    --height-ratio: calc(56.65 / 100);
+    --width-ratio: calc(74.6 / 100);
+    padding: calc(6.525% / var(--width-ratio)) calc(13.625% / var(--width-ratio));
+    width: calc(47.35% / var(--width-ratio));
+    background-color: grey;
+    --small-radius-base: 2.54%;
+    --big-radius-base: 10.56%;
+    border-top-left-radius: calc(var(--small-radius-base) / var(--width-ratio)) calc(var(--small-radius-base) / var(--height-ratio));
+    border-bottom-left-radius: calc(var(--small-radius-base) / var(--width-ratio)) calc(var(--small-radius-base) / var(--height-ratio));
+    border-top-right-radius: calc(var(--small-radius-base) / var(--width-ratio)) calc(var(--small-radius-base) / var(--height-ratio));
+    border-bottom-right-radius: calc(var(--big-radius-base) / var(--width-ratio)) calc(var(--big-radius-base) / var(--height-ratio));
 }
 
 body {
     background-color: #f7f7f7;
+}
+
+#content {
+    max-width: 128vh;
+    margin: auto;
 }
