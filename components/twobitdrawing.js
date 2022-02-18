@@ -4,12 +4,12 @@ const template = document.createElement('template');
 template.innerHTML = `
 <style>
 :host {
-  display: inline-block;
+  display: block;
 }
 two-bit-canvas {
     cursor: crosshair;
     width: 100%;
-    touch-action: none;
+    touch-action: pinch-zoom;
 }
 #colour-picker {
     position: absolute;
@@ -82,9 +82,9 @@ export class TwoBitDrawing extends HTMLElement {
             const x = start.x + (xSign * i);
             const y = Math.round(start.y + (xSign * i * slope));
             const ySign = Math.sign(y - prev.y);
-            console.log(Math.abs(y - prev.y) - 1, prev, x, y, xSign, slope, i);
+            //console.log(Math.abs(y - prev.y) - 1, prev, x, y, xSign, slope, i);
             for (let j = 0; j < Math.abs(y - prev.y); j++) {
-                console.log(prev, x, y, ySign, j, prev.x, prev.y + (ySign * j));
+                //console.log(prev, x, y, ySign, j, prev.x, prev.y + (ySign * j));
                 const altX = Math.round(prev.x + (ySign * j / slope));
                 this.twoBitCanvas.setPixel(altX, prev.y + (ySign * j), this.colour);
             }
@@ -110,6 +110,7 @@ export class TwoBitDrawing extends HTMLElement {
         this.twoBitCanvas.setPixel(x, y, this.colour);
         this.lastPoint = { x, y };
         this.twoBitCanvas.onpointermove = this.pointerMoveHandler.bind(this);
+        this.twoBitCanvas.setPointerCapture(ev.pointerId);
     }
 
     pointerUpHandler(ev) {

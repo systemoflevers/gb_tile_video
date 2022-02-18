@@ -100,6 +100,9 @@ export class TwoBitCanvas extends HTMLElement {
     }
 
     setPixel(x, y, v) {
+        if (x >= this.width  || x < 0 || y >= this.height || y < 0) {
+            return;
+        }
         this.twoBitData[y * this.width + x] = v;
     }
 

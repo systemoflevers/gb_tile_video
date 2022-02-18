@@ -9,4 +9,10 @@ two-bit-drawing {
     border-bottom-right-radius: var(--big-radius);
     width: var(--base-width);
     height: auto;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+body {
+    background-color: #f7f7f7;
 }
