@@ -20,3 +20,8 @@ body {
     max-width: 128vh;
     margin: auto;
 }
+
+two-bit-canvas {
+    width: 80px;
+    margin:1px;
+}

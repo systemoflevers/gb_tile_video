@@ -89,14 +89,16 @@ export class TwoBitDrawing extends HTMLElement {
             this.colour = parseInt(event.target.value);
         });
         this.lastPoint = null;
+        this.needRedraw = false;
+        this.changedTiles = new Set();
     }
 
     drawLine(start, end) {
-        this.twoBitCanvas.setPixel(start.x, start.y, this.colour);
+        this.changedTiles.add(this.twoBitCanvas.setPixel(start.x, start.y, this.colour));
         if (start.x === end.x) {
             const [minY, maxY] = start.y < end.y ? [start.y, end.y] : [end.y, start.y];
             for (let y = minY + 1; y <= maxY; y++) {
-                this.twoBitCanvas.setPixel(start.x, y, this.colour);
+                this.changedTiles.add(this.twoBitCanvas.setPixel(start.x, y, this.colour));
             }
             return;
         }
@@ -111,10 +113,10 @@ export class TwoBitDrawing extends HTMLElement {
             for (let j = 0; j < Math.abs(y - prev.y); j++) {
                 //console.log(prev, x, y, ySign, j, prev.x, prev.y + (ySign * j));
                 const altX = Math.round(prev.x + (ySign * j / slope));
-                this.twoBitCanvas.setPixel(altX, prev.y + (ySign * j), this.colour);
+                this.changedTiles.add(this.twoBitCanvas.setPixel(altX, prev.y + (ySign * j), this.colour));
             }
             prev = { x, y };
-            this.twoBitCanvas.setPixel(x, y, this.colour);
+            this.changedTiles.add(this.twoBitCanvas.setPixel(x, y, this.colour));
         }
     }
 
@@ -123,7 +125,12 @@ export class TwoBitDrawing extends HTMLElement {
         this.twoBitCanvas.onpointerup = this.pointerUpHandler.bind(this);
 
         const draw = () => {
-            this.twoBitCanvas.redrawCanvas();
+            if (this.needRedraw) {
+                this.twoBitCanvas.redrawCanvas();
+                this.needRedraw = false;
+                this.dispatchEvent(new CustomEvent('needRedraw', {detail: this.changedTiles}));
+                this.changedTiles = new Set();
+            }
             requestAnimationFrame(draw);
         };
         draw();
@@ -131,8 +138,10 @@ export class TwoBitDrawing extends HTMLElement {
 
     pointerDownHandler(ev) {
         if (ev.button !== 0) return;
+        this.needRedraw = true;
         const { x, y } = this.getMousePos(ev);
-        this.twoBitCanvas.setPixel(x, y, this.colour);
+        const tileIndex = this.twoBitCanvas.setPixel(x, y, this.colour);
+        this.changedTiles.add(tileIndex);
         this.lastPoint = { x, y };
         this.twoBitCanvas.onpointermove = this.pointerMoveHandler.bind(this);
         this.twoBitCanvas.setPointerCapture(ev.pointerId);
@@ -141,6 +150,7 @@ export class TwoBitDrawing extends HTMLElement {
     pointerUpHandler(ev) {
         if (ev.button !== 0) return;
         if (this.lastPoint === null) return;
+        this.needRedraw = true;
         const { x, y } = this.getMousePos(ev);
 
         this.drawLine(this.lastPoint, { x, y });
@@ -150,6 +160,7 @@ export class TwoBitDrawing extends HTMLElement {
     }
 
     pointerMoveHandler(event) {
+        this.needRedraw = true;
         if (event.getCoalescedEvents) {
             const events = event.getCoalescedEvents();
             if (events.length > 0) {
@@ -175,6 +186,10 @@ export class TwoBitDrawing extends HTMLElement {
             x: convertCoordinate(event.clientX, rect.left, rect.width, this.twoBitCanvas.width),
             y: convertCoordinate(event.clientY, rect.top, rect.height, this.twoBitCanvas.height)
         };
+    }
+
+    getTiles() {
+        return this.twoBitCanvas.getTiles();
     }
 }
 customElements.define('two-bit-drawing', TwoBitDrawing);

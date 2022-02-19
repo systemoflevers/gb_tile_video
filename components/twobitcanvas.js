@@ -1,4 +1,4 @@
-import {ArrayBufferToBase64} from '../modules/data_conversion.js';
+import { ArrayBufferToBase64, PixelArrayToTiles } from '../modules/data_conversion.js';
 
 const template = document.createElement('template');
 template.innerHTML = `
@@ -28,7 +28,7 @@ const green2_colours = [
     [8, 24, 32],
 ]
 const grey_colours = [
-    [255,255, 255],
+    [255, 255, 255],
     [171, 171, 171],
     [85, 85, 85],
     [0, 0, 0],
@@ -45,11 +45,13 @@ export class TwoBitCanvas extends HTMLElement {
         this.canvas = shadow.querySelector('canvas');
 
         const ctx = this.canvas.getContext('2d');
-        const imageData = ctx.createImageData(this.width, this.height);
-        this.imageData = imageData;
+        //const imageData = ctx.createImageData(this.width, this.height);
+        //this.imageData = imageData;
         this.ctx = ctx;
         this.colours = colours;
-        this.updateDimensions();
+        if (this.width && this.height) {
+            this.updateDimensions();
+        }
 
     }
 
@@ -80,11 +82,21 @@ export class TwoBitCanvas extends HTMLElement {
     }
 
     updateDimensions() {
+        if (this.width === 0) return;
+        if (this.height === 0) return;
         this.canvas.width = this.width;
         this.canvas.height = this.height;
 
         this.imageData = this.ctx.createImageData(this.width, this.height);
         this.twoBitData = new Uint8Array(this.width * this.height);
+        this.redrawCanvas();
+    }
+
+    setTwoBitData(twoBitData) {
+        if (twoBitData.length != this.width * this.height) {
+            return;
+        }
+        this.twoBitData = twoBitData;
         this.redrawCanvas();
     }
 
@@ -100,10 +112,11 @@ export class TwoBitCanvas extends HTMLElement {
     }
 
     setPixel(x, y, v) {
-        if (x >= this.width  || x < 0 || y >= this.height || y < 0) {
-            return;
+        if (x >= this.width || x < 0 || y >= this.height || y < 0) {
+            return -1;
         }
         this.twoBitData[y * this.width + x] = v;
+        return Math.floor(x/8) + Math.floor(y/8) * this.width/8;
     }
 
     drawPixel(x, y, v) {
@@ -119,6 +132,10 @@ export class TwoBitCanvas extends HTMLElement {
 
     getB64ByteEncodedPixels() {
         return ArrayBufferToBase64(this.twoBitData);
+    }
+
+    getTiles() {
+        return PixelArrayToTiles(this.twoBitData, this.width, this.height);
     }
 }
 
