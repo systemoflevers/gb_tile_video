@@ -70,7 +70,6 @@ two-bit-canvas {
 
 function convertCoordinate(point, origin, boundingLength, pixelLength) {
     const v = Math.floor(((point - origin) / boundingLength) * pixelLength);
-    //console.log(point, origin, boundingLength, pixelLength, (point - origin), v);
     return v;
 }
 
@@ -109,9 +108,7 @@ export class TwoBitDrawing extends HTMLElement {
             const x = start.x + (xSign * i);
             const y = Math.round(start.y + (xSign * i * slope));
             const ySign = Math.sign(y - prev.y);
-            //console.log(Math.abs(y - prev.y) - 1, prev, x, y, xSign, slope, i);
             for (let j = 0; j < Math.abs(y - prev.y); j++) {
-                //console.log(prev, x, y, ySign, j, prev.x, prev.y + (ySign * j));
                 const altX = Math.round(prev.x + (ySign * j / slope));
                 this.changedTiles.add(this.twoBitCanvas.setPixel(altX, prev.y + (ySign * j), this.colour));
             }
@@ -155,7 +152,6 @@ export class TwoBitDrawing extends HTMLElement {
 
         this.drawLine(this.lastPoint, { x, y });
         this.lastPoint = null;
-        //this.twoBitCanvas.setPixel(x, y, this.colour);
         this.twoBitCanvas.onpointermove = null;
     }
 

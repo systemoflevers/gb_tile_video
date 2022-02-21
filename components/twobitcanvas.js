@@ -1,4 +1,4 @@
-import { ArrayBufferToBase64, PixelArrayToTiles } from '../modules/data_conversion.js';
+import { pixelArrayToTiles, arrayBufferToHexString, arrayBufferToBase64 } from '../modules/data_conversion.js';
 
 const template = document.createElement('template');
 template.innerHTML = `
@@ -131,11 +131,21 @@ export class TwoBitCanvas extends HTMLElement {
     }
 
     getB64ByteEncodedPixels() {
-        return ArrayBufferToBase64(this.twoBitData);
+        return arrayBufferToBase64(this.twoBitData);
     }
 
     getTiles() {
-        return PixelArrayToTiles(this.twoBitData, this.width, this.height);
+        return pixelArrayToTiles(this.twoBitData, this.width, this.height);
+    }
+
+    getGBDataAsHex() {
+        const tiles = pixelArrayToTiles(this.twoBitData, this.width, this.height);
+        return arrayBufferToHexString(tiles.toGBTileData().buffer, ' ');
+    }
+
+    getGBDataAsB64() {
+        const tiles = pixelArrayToTiles(this.twoBitData, this.width, this.height);
+        return arrayBufferToBase64(tiles.toGBTileData().buffer, ' ');
     }
 }
 

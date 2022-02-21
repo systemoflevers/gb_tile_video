@@ -7,14 +7,23 @@ function doStuff() {
     showButton.addEventListener('click', (ev) => {
         showTiles();
         showButton.hidden = true;
-    })
+    });
+        const drawing = document.querySelector('two-bit-drawing');
+    const printHex = document.getElementById('print-hex-data');
+    printHex.addEventListener('click', (ev) => {
+        console.log(drawing.twoBitCanvas.getGBDataAsHex());
+    });
+    const printB64 = document.getElementById('print-b64-data');
+    printB64.addEventListener('click', (ev) => {
+        console.log(drawing.twoBitCanvas.getGBDataAsB64());
+    });
 }
 
 
 function showTiles() {
     const drawing = document.querySelector('two-bit-drawing');
 
-    const numTiles = 160*144/64;
+    const numTiles = (drawing.twoBitCanvas.width*drawing.twoBitCanvas.height)/64;
     tiles = new Array(numTiles);
     const tileData = drawing.getTiles();
     for (let i = 0; i < numTiles; i++) {
