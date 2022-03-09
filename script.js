@@ -21,7 +21,7 @@ function doStuff() {
 
 
 function showTiles() {
-    const drawing = document.querySelector('two-bit-drawing');
+    const drawing = document.querySelector('two-bit-drawing#main');
 
     const numTiles = (drawing.twoBitCanvas.width*drawing.twoBitCanvas.height)/64;
     tiles = new Array(numTiles);

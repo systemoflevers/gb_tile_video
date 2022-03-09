@@ -36,6 +36,9 @@ class TileSet {
         this.tiles[tile][x + y * 8] = v;
     }
 
+    /**
+     * Gets the tile data in GameBoy's graphics format (2BPP).
+     */
     toGBTileData() {
         const gbTileData = new Uint8Array(this.tiles.length * 16);
         for (let i = 0; i < this.tiles.length; i++) {
@@ -102,6 +105,13 @@ function byteTileRowToGBTileRow(byteRow, outGBRow) {
     }
 }
 
+/**
+ * Turns a 1-byte-per-pixel 8x8 tile into the GameBoy 2-bit-per-pixel format.
+ * Each row is two bytes. The two bits of a pixel are split into that pixel's
+ * row's two bytes.
+ * Note: Each byte in the 1-byte-per-pixel tile is still expected to 0, 1, 2, or
+ * 3. Not arbitrary values.
+ */
 function byteTileToGBTile(tile, opt_gbTile) {
     if (tile.byteLength !== 64) return null;
     

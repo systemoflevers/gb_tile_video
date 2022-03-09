@@ -1,4 +1,4 @@
-two-bit-drawing {
+two-bit-drawing#main {
     --height-ratio: calc(56.65 / 100);
     --width-ratio: calc(74.6 / 100);
     padding: calc(6.525% / var(--width-ratio)) calc(13.625% / var(--width-ratio));
