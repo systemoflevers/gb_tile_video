@@ -134,6 +134,9 @@ export class TwoBitDrawing extends HTMLElement {
     }
 
     setPixel(x, y, v) {
+        if (x >= this.width || x < 0 || y >= this.height || y < 0) {
+            return -1;
+        }
         return this.tileMap.setPixel(x, y, v);
         return this.twoBitCanvas.setPixel(x, y, v);
     }
