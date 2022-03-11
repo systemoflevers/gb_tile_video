@@ -111,6 +111,13 @@ export class TwoBitCanvas extends HTMLElement {
         this.ctx.putImageData(this.imageData, 0, 0);
     }
 
+    /**
+     * Updates the data model without updating the canvas.
+     * @param x 
+     * @param y 
+     * @param v 
+     * @returns The index of the tile containing the pixel.
+     */
     setPixel(x, y, v) {
         if (x >= this.width || x < 0 || y >= this.height || y < 0) {
             return -1;

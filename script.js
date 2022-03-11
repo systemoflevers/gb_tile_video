@@ -23,9 +23,9 @@ function doStuff() {
 function showTiles() {
     const drawing = document.querySelector('two-bit-drawing#main');
 
-    const numTiles = (drawing.twoBitCanvas.width*drawing.twoBitCanvas.height)/64;
+    const tileData = drawing.getTiles(); 
+    const numTiles = tileData.tiles.length;
     tiles = new Array(numTiles);
-    const tileData = drawing.getTiles();
     for (let i = 0; i < numTiles; i++) {
         const tile = document.createElement('two-bit-canvas');
         tile.width = 8;

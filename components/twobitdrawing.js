@@ -235,7 +235,7 @@ export class TwoBitDrawing extends HTMLElement {
     }
 
     getTiles() {
-        return this.twoBitCanvas.getTiles();
+        return this.tileMap.tileSet;
     }
 }
 customElements.define('two-bit-drawing', TwoBitDrawing);
