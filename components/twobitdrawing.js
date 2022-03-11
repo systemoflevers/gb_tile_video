@@ -92,6 +92,35 @@ export class TwoBitDrawing extends HTMLElement {
         this.changedTiles = new Set();
     }
 
+    static get observedAttributes() { return ['width', 'height']; }
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue === newValue) return;
+        console.log('change', name, oldValue, newValue, this[name]);
+        this.updateDimensions();
+    }
+
+    get height() {
+        return parseInt(this.getAttribute('height')) || 0;
+    }
+    set height(value) {
+        console.log('height setter');
+        this.setAttribute('height', value);
+    }
+
+    get width() {
+        return parseInt(this.getAttribute('width')) || 0;
+    }
+    set width(value) {
+        this.setAttribute('width', value);
+    }
+
+    updateDimensions() {
+        if (this.width === 0) return;
+        if (this.height === 0) return;
+        this.twoBitCanvas.width = this.width;
+        this.twoBitCanvas.height = this.height
+    }
+
     drawLine(start, end) {
         this.changedTiles.add(this.twoBitCanvas.setPixel(start.x, start.y, this.colour));
         if (start.x === end.x) {
