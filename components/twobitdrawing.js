@@ -117,6 +117,15 @@ export class TwoBitDrawing extends HTMLElement {
     updateDimensions() {
         if (this.width === 0) return;
         if (this.height === 0) return;
+        if (this.width % 8 !== 0) {
+            this.width = 8 * Math.ceil(this.width / 8);
+            // I think this should cause an attributeChanged event.
+            return;
+        }
+        if (this.height % 8 !== 0) {
+            this.height = 8 * Math.ceil(this.height / 8);
+            return;
+        }
         this.twoBitCanvas.width = this.width;
         this.twoBitCanvas.height = this.height
     }
