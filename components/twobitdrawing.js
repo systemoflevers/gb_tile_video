@@ -1,4 +1,5 @@
 import { TwoBitCanvas } from './twobitcanvas.js';
+import { TileMap } from '../modules/data_conversion.js';
 
 const template = document.createElement('template');
 template.innerHTML = `
@@ -58,7 +59,7 @@ two-bit-canvas {
     border-color: rgb(136, 192, 112);
 }
 </style>
-<two-bit-canvas width="160" height="144"></two-bit-canvas>
+<two-bit-canvas></two-bit-canvas>
 <div id="colour-picker">
 <span><input type="radio" name="colour" id="c0" value="0" />
 <label for="c0"><div id="swatch-0"></div></label></span>
@@ -128,14 +129,21 @@ export class TwoBitDrawing extends HTMLElement {
         }
         this.twoBitCanvas.width = this.width;
         this.twoBitCanvas.height = this.height
+
+        this.tileMap = TileMap.makeSimpleMap(this.width / 8, this.height / 8);
+    }
+
+    setPixel(x, y, v) {
+        return this.tileMap.setPixel(x, y, v);
+        return this.twoBitCanvas.setPixel(x, y, v);
     }
 
     drawLine(start, end) {
-        this.changedTiles.add(this.twoBitCanvas.setPixel(start.x, start.y, this.colour));
+        this.changedTiles.add(this.setPixel(start.x, start.y, this.colour));
         if (start.x === end.x) {
             const [minY, maxY] = start.y < end.y ? [start.y, end.y] : [end.y, start.y];
             for (let y = minY + 1; y <= maxY; y++) {
-                this.changedTiles.add(this.twoBitCanvas.setPixel(start.x, y, this.colour));
+                this.changedTiles.add(this.setPixel(start.x, y, this.colour));
             }
             return;
         }
@@ -148,10 +156,10 @@ export class TwoBitDrawing extends HTMLElement {
             const ySign = Math.sign(y - prev.y);
             for (let j = 0; j < Math.abs(y - prev.y); j++) {
                 const altX = Math.round(prev.x + (ySign * j / slope));
-                this.changedTiles.add(this.twoBitCanvas.setPixel(altX, prev.y + (ySign * j), this.colour));
+                this.changedTiles.add(this.setPixel(altX, prev.y + (ySign * j), this.colour));
             }
             prev = { x, y };
-            this.changedTiles.add(this.twoBitCanvas.setPixel(x, y, this.colour));
+            this.changedTiles.add(this.setPixel(x, y, this.colour));
         }
     }
 
@@ -159,9 +167,10 @@ export class TwoBitDrawing extends HTMLElement {
         this.twoBitCanvas.onpointerdown = this.pointerDownHandler.bind(this);
         this.twoBitCanvas.onpointerup = this.pointerUpHandler.bind(this);
 
+        this.updateDimensions();
         const draw = () => {
             if (this.needRedraw) {
-                this.twoBitCanvas.redrawCanvas();
+                this.twoBitCanvas.setTwoBitData(this.tileMap.toPixelArray());
                 this.needRedraw = false;
                 this.dispatchEvent(new CustomEvent('needRedraw', {detail: this.changedTiles}));
                 this.changedTiles = new Set();
@@ -175,7 +184,7 @@ export class TwoBitDrawing extends HTMLElement {
         if (ev.button !== 0) return;
         this.needRedraw = true;
         const { x, y } = this.getMousePos(ev);
-        const tileIndex = this.twoBitCanvas.setPixel(x, y, this.colour);
+        const tileIndex = this.setPixel(x, y, this.colour);
         this.changedTiles.add(tileIndex);
         this.lastPoint = { x, y };
         this.twoBitCanvas.onpointermove = this.pointerMoveHandler.bind(this);
