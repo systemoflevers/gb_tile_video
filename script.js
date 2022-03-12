@@ -45,8 +45,10 @@ function showTiles() {
     const updateDrawing = () => {
         if (redrawNeeded) {
             redrawNeeded = false;
+            const workTiles = tilesToUpdate;
+            tilesToUpdate = [];
             const t = drawing.getTiles();
-            for (const toUpdate of tilesToUpdate) {
+            for (const toUpdate of workTiles) {
                 for (const i of toUpdate) {
                     if (i < 0) continue;
                     tiles[i].setTwoBitData(t.tiles[i]);
