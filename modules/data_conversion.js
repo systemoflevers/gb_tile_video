@@ -33,9 +33,23 @@ class TileMap {
         const tileCount = widthInTiles * heightInTiles;
         const tileSet = new TileSet(tileCount);
         const tileMap = new TileMap(widthInTiles, heightInTiles, tileSet);
-        tileMap.tileMap.forEach((v, i, arr) => arr[i] = i);
+        tileMap.tileMap.forEach((v, i, arr) => {
+            const x = i % widthInTiles;
+            const y = Math.floor(i / widthInTiles);
+            arr[i] = (x%4) + 4*(y%4);
+        });
         return tileMap;
-    } 
+    }
+
+    static makeRandom(widthInTiles, heightInTiles) {
+        const tileCount = Math.ceil(Math.random() * 359) + 1;
+        const tileSet = new TileSet(tileCount);
+        const tileMap = new TileMap(widthInTiles, heightInTiles, tileSet);
+        tileMap.tileMap.forEach((v, i, arr) => {
+            arr[i] = Math.floor(Math.random() * tileCount);
+        });
+        return tileMap;
+    }
 
     toTileXY(x, y) {
         const mapIndex = Math.floor(y / 8) * this.widthInTiles + Math.floor(x / 8);
