@@ -13,6 +13,9 @@ two-bit-canvas {
     width: 100%;
     touch-action: pinch-zoom;
 }
+#tool-picker {
+    position: absolute;
+}
 #colour-picker {
     position: absolute;
     //margin-top: 5px;
@@ -67,6 +70,14 @@ two-bit-canvas {
 <span><input type="radio" name="colour" id="c2" value="2" /><label for="c2"><div id="swatch-2"></div></label></span>
 <span><input type="radio" name="colour" id="c3" value="3" checked /><label for="c3"><div id="swatch-3"></div></label></span>
 </div>
+<div id="tool-picker">
+<span><input type="radio" name="tool" id="pencil" value="0" checked />
+<label for="pencil">pencil</label></span>
+<span><input type="radio" name="tool" id="tile-select" value="1" />
+<label for="tile-select">tile-select</label></span>
+<span><input type="radio" name="tool" id="tile-place" value="2" />
+<label for="tile-place">place tile</label></span>
+</div>
 `;
 
 function convertCoordinate(point, origin, boundingLength, pixelLength) {
@@ -74,7 +85,11 @@ function convertCoordinate(point, origin, boundingLength, pixelLength) {
     return v;
 }
 
-export class TwoBitDrawing extends HTMLElement {
+const PENCIL = 0;
+const TILE_SELECT = 1;
+const TILE_PLACE = 2;
+
+class TwoBitDrawing extends HTMLElement {
     constructor() {
         super();
 
@@ -84,13 +99,21 @@ export class TwoBitDrawing extends HTMLElement {
         this.isPointerDown = false;
         this.colour = 3;
 
-        const pickerDiv = shadow.getElementById('colour-picker');
-        pickerDiv.addEventListener('change', (event) => {
+        const colourPickerDiv = shadow.getElementById('colour-picker');
+        colourPickerDiv.addEventListener('change', (event) => {
             this.colour = parseInt(event.target.value);
+        });
+        const toolPickerDiv = shadow.getElementById('tool-picker');
+        toolPickerDiv.addEventListener('change', (ev) => {
+            this.tool = parseInt(ev.target.value);
         });
         this.lastPoint = null;
         this.needRedraw = false;
         this.changedTiles = new Set();
+
+        this.tool = PENCIL;
+
+        this.selectedTile = null;
     }
 
     static get observedAttributes() { return ['width', 'height']; }
@@ -130,7 +153,7 @@ export class TwoBitDrawing extends HTMLElement {
         this.twoBitCanvas.width = this.width;
         this.twoBitCanvas.height = this.height
 
-        this.tileMap = TileMap.makeRandom(this.width / 8, this.height / 8);
+        this.tileMap = TileMap.makeSimpleMap(this.width / 8, this.height / 8);
     }
 
     setPixel(x, y, v) {
@@ -185,13 +208,31 @@ export class TwoBitDrawing extends HTMLElement {
 
     pointerDownHandler(ev) {
         if (ev.button !== 0) return;
-        this.needRedraw = true;
+
         const { x, y } = this.getMousePos(ev);
-        const tileIndex = this.setPixel(x, y, this.colour);
-        this.changedTiles.add(tileIndex);
-        this.lastPoint = { x, y };
-        this.twoBitCanvas.onpointermove = this.pointerMoveHandler.bind(this);
-        this.twoBitCanvas.setPointerCapture(ev.pointerId);
+        if (this.tool === PENCIL) {
+            this.needRedraw = true;
+            const tileIndex = this.setPixel(x, y, this.colour);
+            this.changedTiles.add(tileIndex);
+            this.lastPoint = { x, y };
+            this.twoBitCanvas.onpointermove = this.pointerMoveHandler.bind(this);
+            this.twoBitCanvas.setPointerCapture(ev.pointerId);
+        } else if(this.tool === TILE_SELECT) {
+            // Use toTileXY to get the index of the tile that's displayed.
+            //const {tileIndex} = this.tileMap.toTileXY(x, y);
+            const tileMapIndex = this.tileMap.toMapIndex(x, y);
+            this.selectedTile = tileMapIndex;
+            const tileIndex = this.tileMap.tileMap[tileMapIndex];
+            this.dispatchEvent(new CustomEvent('tileSelected', { detail: tileIndex }));
+            return;
+        } else if(this.tool === TILE_PLACE) {
+            // Use toMapIndex to get the map index for the clicked point. This
+            // is so we can change what's being displayed there.
+            const tileIndex = this.tileMap.toMapIndex(x, y);
+            this.needRedraw = true;
+            this.tileMap.tileMap[tileIndex] = this.tileMap.tileMap[this.selectedTile];
+            return;
+        }
     }
 
     pointerUpHandler(ev) {
@@ -237,5 +278,19 @@ export class TwoBitDrawing extends HTMLElement {
     getTiles() {
         return this.tileMap.tileSet;
     }
+
+    setTwoBitData(twoBitData) {
+        if (twoBitData.length != this.width * this.height) {
+            return;
+        }
+        this.tileMap.tileSet
+        this.twoBitCanvas.setTwoBitData(twoBitData);
+    }
 }
 customElements.define('two-bit-drawing', TwoBitDrawing);
+
+export {
+    TwoBitDrawing,
+    PENCIL,
+    TILE_SELECT,
+}

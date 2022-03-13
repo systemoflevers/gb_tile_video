@@ -17,11 +17,17 @@ body {
 }
 
 #content {
-    max-width: 128vh;
+    /*max-width: 128vh;*/
+    max-width: 50%;
     margin: auto;
 }
 
 two-bit-canvas {
     width: 5vw;
     margin:1px;
+}
+
+#tile-edit {
+    width: 30%;
+    margin: auto;
 }

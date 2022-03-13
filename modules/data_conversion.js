@@ -36,7 +36,7 @@ class TileMap {
         tileMap.tileMap.forEach((v, i, arr) => {
             const x = i % widthInTiles;
             const y = Math.floor(i / widthInTiles);
-            arr[i] = (x%4) + 4*(y%4);
+            arr[i] = i;//(x%4) + 4*(y%4);
         });
         return tileMap;
     }
@@ -51,8 +51,12 @@ class TileMap {
         return tileMap;
     }
 
+    toMapIndex(x, y) {
+        return Math.floor(y / 8) * this.widthInTiles + Math.floor(x / 8);
+    }
+
     toTileXY(x, y) {
-        const mapIndex = Math.floor(y / 8) * this.widthInTiles + Math.floor(x / 8);
+        const mapIndex = this.toMapIndex(x, y);
         const tileIndex = this.tileMap[mapIndex];
         const tileX = x % 8;
         const tileY = y % 8;

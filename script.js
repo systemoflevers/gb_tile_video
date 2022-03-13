@@ -1,5 +1,6 @@
 var tileDiv;
 var tiles;
+var tile;
 
 function doStuff() {
     tileDiv = document.getElementById('tiles');
@@ -8,7 +9,7 @@ function doStuff() {
         showTiles();
         showButton.hidden = true;
     });
-        const drawing = document.querySelector('two-bit-drawing');
+    const drawing = document.querySelector('two-bit-drawing');
     const printHex = document.getElementById('print-hex-data');
     printHex.addEventListener('click', (ev) => {
         console.log(drawing.twoBitCanvas.getGBDataAsHex());
@@ -17,6 +18,14 @@ function doStuff() {
     printB64.addEventListener('click', (ev) => {
         console.log(drawing.twoBitCanvas.getGBDataAsB64());
     });
+    tile = document.getElementById('tile-drawing');
+    drawing.addEventListener('tileSelected', (ev) => {
+        const tileData = drawing.tileMap.tileSet.tiles[ev.detail];
+        tile.tileMap.tileSet.tiles[0] = tileData;
+        tile.needRedraw = true;
+    });
+    tile.addEventListener('needRedraw', (ev) => drawing.needRedraw = true);
+    drawing.addEventListener('needRedraw', (ev) => tile.needRedraw = true);
 }
 
 
