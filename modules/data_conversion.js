@@ -7,6 +7,15 @@ function arrayBufferToBase64(buffer) {
     return window.btoa(stringEncodedBinary);
 }
 
+function base64ToUint8Array(b64String) {
+    const stringEncodedBinary = window.atob(b64String);
+    const bytes = new Uint8Array(stringEncodedBinary.length);
+    for (let i = 0; i < bytes.length; ++i) {
+        bytes[i] = stringEncodedBinary.charCodeAt(i);
+    }
+    return bytes;
+}
+
 function arrayBufferToHexString(buffer, delimiter = '', prefix = '') {
     const bytes = new Uint8Array(buffer);
     let hexStringArray = [];
@@ -36,7 +45,7 @@ class TileMap {
         tileMap.tileMap.forEach((v, i, arr) => {
             const x = i % widthInTiles;
             const y = Math.floor(i / widthInTiles);
-            arr[i] = i;//(x%4) + 4*(y%4);
+            arr[i] = 0; //i;//(x%4) + 4*(y%4);
         });
         return tileMap;
     }
@@ -94,6 +103,22 @@ class TileMap {
         }
         return pixelArray;
     }
+
+    toGBData() {
+        const tileMap = new Uint8Array(this.tileCount);
+        for (let i = 0; i < this.tileCount; ++i) {
+            tileMap[i] = this.tileMap[i];
+        }
+        return {map: tileMap, tiles: this.tileSet.toGBTileData()};
+    }
+
+    fromGBData(tileMap, tiles) {
+        const tileCount = Math.min(tileMap.length, this.tileMap.length);
+        for (let i = 0; i < tileCount; ++i) {
+            this.tileMap[i] = tileMap[i];
+        }
+        this.tileSet.fromGBTileData(tiles);
+    }
 }
 
 class TileSet {
@@ -123,6 +148,15 @@ class TileSet {
             byteTileToGBTile(this.tiles[i], gbTile);
         }
         return gbTileData;
+    }
+
+    fromGBTileData(gbTileData) {
+        const tileCount = Math.min(this.tiles.length, gbTileData.length / 16);
+        for (let i = 0; i < tileCount; ++i) {
+            const byteTile = this.tiles[i];
+            const gbTile = gbTileData.subarray(i * 16, (i + 1) * 16);
+            this.tiles[i] = gbTileToByteTile(gbTile, byteTile);
+        }
     }
 }
 
@@ -182,6 +216,20 @@ function byteTileRowToGBTileRow(byteRow, outGBRow) {
     }
 }
 
+function pixelByteFromGBTileRow(rowHighByte, rowLowByte, pixelIndex) {
+    return (((rowHighByte >> (7-pixelIndex)) & 1) << 1) |
+           (((rowLowByte >> (7-pixelIndex)) & 1));
+}
+
+function gbTileRowToByteTileRow(gbRow, outByteRow) {
+    const gbRowHigh = gbRow[1];
+    const gbRowLow = gbRow[0];
+    for (let i = 0; i < 8; ++i) {
+        outByteRow[i] = pixelByteFromGBTileRow(gbRowHigh, gbRowLow, i);
+    }
+    return outByteRow;
+}
+
 /**
  * Turns a 1-byte-per-pixel 8x8 tile into the GameBoy 2-bit-per-pixel format.
  * Each row is two bytes. The two bits of a pixel are split into that pixel's
@@ -201,10 +249,24 @@ function byteTileToGBTile(tile, opt_gbTile) {
     return gbTile;
 }
 
+function gbTileToByteTile(gbTile, opt_byteTile) {
+    if (gbTile.byteLength != 16) return null;
+
+    const byteTile = opt_byteTile || new Uint8Array(64);
+    for (let row = 0; row < 8; ++row) {
+        const gbTileRow = gbTile.subarray(row * 2, (row + 1) * 2);
+        const byteTileRow = byteTile.subarray(row * 8, (row + 1) * 8);
+        gbTileRowToByteTileRow(gbTileRow, byteTileRow);
+    }
+    return byteTile;
+}
+
 export {
     arrayBufferToBase64,
+    base64ToUint8Array,
     arrayBufferToHexString,
     byteTileToGBTile,
+    gbTileToByteTile,
     pixelArrayToTiles,
     TileMap,
 }

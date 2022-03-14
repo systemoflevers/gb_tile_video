@@ -1,5 +1,6 @@
 import { TwoBitCanvas } from './twobitcanvas.js';
-import { TileMap } from '../modules/data_conversion.js';
+//import { TwoBitColourPicker } from './twobitcolourpicker.js';
+import { arrayBufferToBase64, base64ToUint8Array, TileMap } from '../modules/data_conversion.js';
 
 const template = document.createElement('template');
 template.innerHTML = `
@@ -15,6 +16,8 @@ two-bit-canvas {
 }
 #tool-picker {
     position: absolute;
+    left: 100%;
+    top: 12%;
 }
 #colour-picker {
     position: absolute;
@@ -37,6 +40,9 @@ two-bit-canvas {
     margin-bottom: 3%;
     
 }
+/*#colour-picker {
+    display: none;
+}*/
 #colour-picker div {
     //width: calc(0.1 * var(--base-width));
     width: 10%;
@@ -61,8 +67,14 @@ two-bit-canvas {
     background-color: rgb(8, 24, 32);
     border-color: rgb(136, 192, 112);
 }
+two-bit-colour-picker {
+    position: absolute;
+    width: 25%;
+}
 </style>
+<div>
 <two-bit-canvas></two-bit-canvas>
+<!--two-bit-colour-picker></two-bit-colour-picker-->
 <div id="colour-picker">
 <span><input type="radio" name="colour" id="c0" value="0" />
 <label for="c0"><div id="swatch-0"></div></label></span>
@@ -77,6 +89,7 @@ two-bit-canvas {
 <label for="tile-select">tile-select</label></span>
 <span><input type="radio" name="tool" id="tile-place" value="2" />
 <label for="tile-place">place tile</label></span>
+</div>
 </div>
 `;
 
@@ -113,7 +126,8 @@ class TwoBitDrawing extends HTMLElement {
 
         this.tool = PENCIL;
 
-        this.selectedTile = null;
+        this.selectedTile = 0;
+        this.nextTile = 1;
     }
 
     static get observedAttributes() { return ['width', 'height']; }
@@ -168,7 +182,7 @@ class TwoBitDrawing extends HTMLElement {
         this.changedTiles.add(this.setPixel(start.x, start.y, this.colour));
         if (start.x === end.x) {
             const [minY, maxY] = start.y < end.y ? [start.y, end.y] : [end.y, start.y];
-            for (let y = minY + 1; y <= maxY; y++) {
+            for (let y = minY; y <= maxY; y++) {
                 this.changedTiles.add(this.setPixel(start.x, y, this.colour));
             }
             return;
@@ -204,6 +218,13 @@ class TwoBitDrawing extends HTMLElement {
             requestAnimationFrame(draw);
         };
         draw();
+        if (this.selectedTile !== null) {
+            //const tileIndex = this.tileMap.tileMap.tileMap[this.selectedTile];
+
+            // doesn't seem to work, maybe when this happens nothing's there to
+            // receive the event yet?
+            this.dispatchEvent(new CustomEvent('tileSelected', { detail: this.selectedTile }));
+        }
     }
 
     pointerDownHandler(ev) {
@@ -221,8 +242,11 @@ class TwoBitDrawing extends HTMLElement {
             // Use toTileXY to get the index of the tile that's displayed.
             //const {tileIndex} = this.tileMap.toTileXY(x, y);
             const tileMapIndex = this.tileMap.toMapIndex(x, y);
+            // I don't remember why this indirection is needed...
+            // I think I could just store tileIndex instead.
             this.selectedTile = tileMapIndex;
             const tileIndex = this.tileMap.tileMap[tileMapIndex];
+            this.selectedTile = tileIndex;
             this.dispatchEvent(new CustomEvent('tileSelected', { detail: tileIndex }));
             return;
         } else if(this.tool === TILE_PLACE) {
@@ -230,7 +254,7 @@ class TwoBitDrawing extends HTMLElement {
             // is so we can change what's being displayed there.
             const tileIndex = this.tileMap.toMapIndex(x, y);
             this.needRedraw = true;
-            this.tileMap.tileMap[tileIndex] = this.tileMap.tileMap[this.selectedTile];
+            this.tileMap.tileMap[tileIndex] = this.selectedTile;//this.tileMap.tileMap[this.selectedTile];
             return;
         }
     }
@@ -285,6 +309,37 @@ class TwoBitDrawing extends HTMLElement {
         }
         this.tileMap.tileSet
         this.twoBitCanvas.setTwoBitData(twoBitData);
+    }
+
+    getGBData() {
+        return this.tileMap.toGBData();
+    }
+    
+    fromGBData(tileMap, tiles) {
+        this.tileMap.fromGBData(tileMap, tiles);
+        this.needRedraw = true;
+    }
+
+    getB64JSONGBData() {
+        const {map, tiles} = this.getGBData();
+        const encodedGBData = {
+            map: arrayBufferToBase64(map),
+            tiles: arrayBufferToBase64(tiles),
+        };
+        return JSON.stringify(encodedGBData);
+    }
+
+    fromB64JSONGBData(jsonGBData) {
+        const encodedGBData = JSON.parse(jsonGBData);
+        this.fromGBData(base64ToUint8Array(encodedGBData.map),
+                        base64ToUint8Array(encodedGBData.tiles));
+    }
+
+    getNextTile() {
+        const tileIndex = this.nextTile;
+        this.selectedTile = tileIndex;
+        this.nextTile++;
+        this.dispatchEvent(new CustomEvent('tileSelected', { detail: tileIndex }));
     }
 }
 customElements.define('two-bit-drawing', TwoBitDrawing);

@@ -10,6 +10,10 @@ function doStuff() {
         showButton.hidden = true;
     });
     const drawing = document.querySelector('two-bit-drawing');
+    const nextTile = document.getElementById('next-tile');
+    nextTile.addEventListener('click', (ev) => {
+        drawing.getNextTile();
+    });
     const printHex = document.getElementById('print-hex-data');
     printHex.addEventListener('click', (ev) => {
         console.log(drawing.twoBitCanvas.getGBDataAsHex());
@@ -67,4 +71,8 @@ function showTiles() {
         requestAnimationFrame(updateDrawing);
     };
     updateDrawing();
+}
+
+function getB64EncodedMapData() {
+    const drawing = document.querySelector('two-bit-drawing#main');
 }
