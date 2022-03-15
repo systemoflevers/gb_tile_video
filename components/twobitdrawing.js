@@ -62,7 +62,7 @@ class TwoBitDrawing extends HTMLElement {
 
         const colourPicker = shadow.querySelector('two-bit-colour-picker');
         colourPicker.addEventListener('colour-change', (ev) => {
-            this.colour = ev.detail;
+            this.setColour(ev.detail);
         });
         const toolPickerDiv = shadow.getElementById('tool-picker');
         toolPickerDiv.addEventListener('change', (ev) => {
@@ -116,6 +116,10 @@ class TwoBitDrawing extends HTMLElement {
         this.twoBitCanvas.height = this.height
 
         this.tileMap = TileMap.makeSimpleMap(this.width / 8, this.height / 8);
+    }
+
+    setColour(colourID) {
+        this.colour = colourID;
     }
 
     setPixel(x, y, v) {

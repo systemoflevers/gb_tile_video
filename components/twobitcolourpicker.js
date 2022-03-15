@@ -60,6 +60,19 @@ export class TwoBitColourPicker extends HTMLElement {
     this.shadow.appendChild(template.content.cloneNode(true));
   }
 
+  /*static get observedAttributes() { return ['for']; }
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue === newValue) return;
+
+  }*/
+
+  get for() {
+    return this.getAttribute('for');
+  }
+  set for(value) {
+    this.setAttribute('for', value);
+  }
+
   connectedCallback() {
     const pickerDiv = this.shadow.getElementById('colour-picker');
     pickerDiv.addEventListener('change', this.colourChangeHandler.bind(this));
@@ -68,7 +81,31 @@ export class TwoBitColourPicker extends HTMLElement {
   colourChangeHandler(ev) {
     const colourID = parseInt(ev.target.value);
     const colourChangeEvent = new CustomEvent('colour-change', {detail: colourID});
+    const forValue = this.for;
+    if (forValue) {
+      // Tell other colour pickers that are for the same target to change.
+      // Maybe this logic should be in the target?
+      const allMatchingPickers =
+          this.getRootNode().querySelectorAll(`two-bit-colour-picker[for=${forValue}]`)
+      for (const picker of allMatchingPickers) {
+        if (picker === this) continue;
+        picker.setColourChecked(colourID);
+      }
+
+      const target = this.getRootNode().getElementById(forValue);
+      if (target) {
+        target.setColour(colourID);
+        return;
+      }
+    }
     this.dispatchEvent(colourChangeEvent);
+  }
+
+  /**
+   * Sets a colour as selected. This shouldn't trigger a colour changed event.
+   */
+  setColourChecked(colourID) {
+    this.shadow.getElementById(`c${colourID}`).checked = true;
   }
 }
 
