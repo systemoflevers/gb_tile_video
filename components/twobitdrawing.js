@@ -239,11 +239,15 @@ class TwoBitDrawing extends HTMLElement {
         this.lastPoint = { x, y };
     }
 
-    getMousePos(event) {
+    /**
+     * Translates a mouse position to the position in the twoBitCanvas.
+     * The |clientX| and |clientY| are properties of a pointer/mouse event.
+     */
+    getMousePos({clientX, clientY}) {
         const rect = this.twoBitCanvas.getBoundingClientRect();
         return {
-            x: convertCoordinate(event.clientX, rect.left, rect.width, this.twoBitCanvas.width),
-            y: convertCoordinate(event.clientY, rect.top, rect.height, this.twoBitCanvas.height)
+            x: convertCoordinate(clientX, rect.left, rect.width, this.twoBitCanvas.width),
+            y: convertCoordinate(clientY, rect.top, rect.height, this.twoBitCanvas.height)
         };
     }
 
