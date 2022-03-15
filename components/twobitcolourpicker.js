@@ -60,17 +60,11 @@ export class TwoBitColourPicker extends HTMLElement {
     this.shadow.appendChild(template.content.cloneNode(true));
   }
 
-  /*static get observedAttributes() { return ['for']; }
-  attributeChangedCallback(name, oldValue, newValue) {
-    if (oldValue === newValue) return;
-
-  }*/
-
-  get for() {
-    return this.getAttribute('for');
+  get targetID() {
+    return this.getAttribute('target-id');
   }
-  set for(value) {
-    this.setAttribute('for', value);
+  set targetID(value) {
+    this.setAttribute('target-id', value);
   }
 
   connectedCallback() {
@@ -81,18 +75,18 @@ export class TwoBitColourPicker extends HTMLElement {
   colourChangeHandler(ev) {
     const colourID = parseInt(ev.target.value);
     const colourChangeEvent = new CustomEvent('colour-change', {detail: colourID});
-    const forValue = this.for;
-    if (forValue) {
+    const targetID = this.targetID;
+    if (targetID) {
       // Tell other colour pickers that are for the same target to change.
       // Maybe this logic should be in the target?
       const allMatchingPickers =
-          this.getRootNode().querySelectorAll(`two-bit-colour-picker[for=${forValue}]`)
+          this.getRootNode().querySelectorAll(`two-bit-colour-picker[target-id=${targetID}]`)
       for (const picker of allMatchingPickers) {
         if (picker === this) continue;
         picker.setColourChecked(colourID);
       }
 
-      const target = this.getRootNode().getElementById(forValue);
+      const target = this.getRootNode().getElementById(targetID);
       if (target) {
         target.setColour(colourID);
         return;
