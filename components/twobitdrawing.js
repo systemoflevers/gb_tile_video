@@ -7,7 +7,10 @@ template.innerHTML = `
 <style>
 :host {
   display: block;
-  position: relative;
+  //position: relative;
+}
+#container {
+    position: relative;
 }
 two-bit-canvas {
     cursor: crosshair;
@@ -21,10 +24,10 @@ two-bit-canvas {
 }
 two-bit-colour-picker {
     position: absolute;
-    width: 25%;
+    width: 37%;
 }
 </style>
-<div>
+<div id="container">
 <two-bit-canvas></two-bit-canvas>
 <two-bit-colour-picker></two-bit-colour-picker>
 <div id="tool-picker">
@@ -185,12 +188,12 @@ class TwoBitDrawing extends HTMLElement {
             this.twoBitCanvas.setPointerCapture(ev.pointerId);
         } else if(this.tool === TILE_SELECT) {
             // Use toTileXY to get the index of the tile that's displayed.
-            //const {tileIndex} = this.tileMap.toTileXY(x, y);
-            const tileMapIndex = this.tileMap.toMapIndex(x, y);
+            const {tileIndex} = this.tileMap.toTileXY(x, y);
+            //const tileMapIndex = this.tileMap.toMapIndex(x, y);
             // I don't remember why this indirection is needed...
             // I think I could just store tileIndex instead.
-            this.selectedTile = tileMapIndex;
-            const tileIndex = this.tileMap.tileMap[tileMapIndex];
+            //this.selectedTile = tileMapIndex;
+            //const tileIndex = this.tileMap.tileMap[tileMapIndex];
             this.selectedTile = tileIndex;
             this.dispatchEvent(new CustomEvent('tileSelected', { detail: tileIndex }));
             return;
