@@ -50,6 +50,18 @@ class TileMap {
         return tileMap;
     }
 
+    static makeFullMap(widthInTiles, heightInTiles) {
+        const tileCount = widthInTiles * heightInTiles;
+        const tileSet = new TileSet(tileCount);
+        const tileMap = new TileMap(widthInTiles, heightInTiles, tileSet);
+        tileMap.tileMap.forEach((v, i, arr) => {
+            const x = i % widthInTiles;
+            const y = Math.floor(i / widthInTiles);
+            arr[i] = i;
+        });
+        return tileMap;
+    }
+
     static makeRandom(widthInTiles, heightInTiles) {
         const tileCount = Math.ceil(Math.random() * 359) + 1;
         const tileSet = new TileSet(tileCount);
