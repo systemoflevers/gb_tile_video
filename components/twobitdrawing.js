@@ -1,5 +1,5 @@
 import { TwoBitCanvas } from './twobitcanvas.js';
-//import { TwoBitColourPicker } from './twobitcolourpicker.js';
+import { TwoBitColourPicker } from './twobitcolourpicker.js';
 import { arrayBufferToBase64, base64ToUint8Array, TileMap } from '../modules/data_conversion.js';
 
 const template = document.createElement('template');
@@ -19,54 +19,6 @@ two-bit-canvas {
     left: 100%;
     top: 12%;
 }
-#colour-picker {
-    position: absolute;
-    //margin-top: 5px;
-    width: 63%;
-}
-
-#colour-picker input {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-}
-
-#colour-picker input:checked ~ label>div {
-    /*border-color: white;*/
-    /* border-style: solid; */
-    border-width: 4px;
-    padding-bottom: 0%;
-    /* border-color: white; */
-    margin-bottom: 3%;
-    
-}
-/*#colour-picker {
-    display: none;
-}*/
-#colour-picker div {
-    //width: calc(0.1 * var(--base-width));
-    width: 10%;
-    aspect-ratio: 1;
-    display: inline-block;
-    //padding: 3px;
-    //box-sizing: border-box;
-}
-#swatch-0 {
-    background-color: rgb(224, 248, 208);
-    border-color: rgb(52, 104, 86);
-}
-#swatch-1 {
-    background-color: rgb(136, 192, 112);
-    border-color: rgb(8, 24, 32);
-}
-#swatch-2 {
-    background-color: rgb(52, 104, 86);
-    border-color: rgb(224, 248, 208);
-}
-#swatch-3{
-    background-color: rgb(8, 24, 32);
-    border-color: rgb(136, 192, 112);
-}
 two-bit-colour-picker {
     position: absolute;
     width: 25%;
@@ -74,14 +26,7 @@ two-bit-colour-picker {
 </style>
 <div>
 <two-bit-canvas></two-bit-canvas>
-<!--two-bit-colour-picker></two-bit-colour-picker-->
-<div id="colour-picker">
-<span><input type="radio" name="colour" id="c0" value="0" />
-<label for="c0"><div id="swatch-0"></div></label></span>
-<span><input type="radio" name="colour" id="c1" value="1" /><label for="c1"><div id="swatch-1"></div></label></span>
-<span><input type="radio" name="colour" id="c2" value="2" /><label for="c2"><div id="swatch-2"></div></label></span>
-<span><input type="radio" name="colour" id="c3" value="3" checked /><label for="c3"><div id="swatch-3"></div></label></span>
-</div>
+<two-bit-colour-picker></two-bit-colour-picker>
 <div id="tool-picker">
 <span><input type="radio" name="tool" id="pencil" value="0" checked />
 <label for="pencil">pencil</label></span>
@@ -112,9 +57,9 @@ class TwoBitDrawing extends HTMLElement {
         this.isPointerDown = false;
         this.colour = 3;
 
-        const colourPickerDiv = shadow.getElementById('colour-picker');
-        colourPickerDiv.addEventListener('change', (event) => {
-            this.colour = parseInt(event.target.value);
+        const colourPicker = shadow.querySelector('two-bit-colour-picker');
+        colourPicker.addEventListener('colour-change', (ev) => {
+            this.colour = ev.detail;
         });
         const toolPickerDiv = shadow.getElementById('tool-picker');
         toolPickerDiv.addEventListener('change', (ev) => {
