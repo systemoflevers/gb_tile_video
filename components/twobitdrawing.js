@@ -1,5 +1,4 @@
 import { TwoBitCanvas } from './twobitcanvas.js';
-import { TwoBitColourPicker } from './twobitcolourpicker.js';
 import { arrayBufferToBase64, base64ToUint8Array, TileMap } from '../modules/data_conversion.js';
 
 const template = document.createElement('template');
@@ -29,7 +28,6 @@ two-bit-colour-picker {
 </style>
 <div id="container">
 <two-bit-canvas></two-bit-canvas>
-<two-bit-colour-picker></two-bit-colour-picker>
 <div id="tool-picker">
 <span><input type="radio" name="tool" id="pencil" value="0" checked />
 <label for="pencil">pencil</label></span>
@@ -60,10 +58,6 @@ class TwoBitDrawing extends HTMLElement {
         this.isPointerDown = false;
         this.colour = 3;
 
-        const colourPicker = shadow.querySelector('two-bit-colour-picker');
-        colourPicker.addEventListener('colour-change', (ev) => {
-            this.setColour(ev.detail);
-        });
         const toolPickerDiv = shadow.getElementById('tool-picker');
         toolPickerDiv.addEventListener('change', (ev) => {
             this.tool = parseInt(ev.target.value);

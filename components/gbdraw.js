@@ -1,4 +1,5 @@
 import { TwoBitDrawing } from './twobitdrawing.js';
+import { TwoBitColourPicker } from './twobitcolourpicker.js';
 import { arrayBufferToBase64, base64ToUint8Array, TileMap } from '../modules/data_conversion.js';
 
 const template = document.createElement('template');
@@ -17,9 +18,22 @@ two-bit-drawing {
   border-top-right-radius: calc(var(--small-radius-base) / var(--width-ratio)) calc(var(--small-radius-base) / var(--height-ratio));
   border-bottom-right-radius: calc(var(--big-radius-base) / var(--width-ratio)) calc(var(--big-radius-base) / var(--height-ratio));
 }
+#container {
+  position: relative;
+}
+
+two-bit-colour-picker {
+  /* TODO: See if this can/should be computed similarly to two-bit-drawing sizes
+           above. */
+  position: absolute;
+  width: 24%;
+  left: 18%;
+  bottom: 1%;
+}
 </style>
-<div>
-  <two-bit-drawing width="160" height="144"></two-bit-drawing>
+<div id='container'>
+  <two-bit-drawing id="drawing" width="160" height="144"></two-bit-drawing>
+  <two-bit-colour-picker target-id="drawing"></two-bit-colour-picker>
 </div>
 `
 
