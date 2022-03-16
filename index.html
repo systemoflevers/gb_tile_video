@@ -12,12 +12,12 @@
     </head>
     <body onload="doStuff()">
         <div id="content">
-            <two-bit-drawing id="main" width="160" height="144"></two-bit-drawing>
+            <two-bit-drawing id="main" width="160" height="144" colour-picker-id="colour-picker"></two-bit-drawing>
         </div>
-        <two-bit-colour-picker target-id="main tile-drawing"></two-bit-colour-picker>
+        <two-bit-colour-picker id="colour-picker"></two-bit-colour-picker>
         <button id="next-tile">next tile</button>
         <div id="tile-edit">
-            <two-bit-drawing id="tile-drawing" width="8" height="8"></two-bit-drawing>
+            <two-bit-drawing id="tile-drawing" width="8" height="8"colour-picker-id="colour-picker"></two-bit-drawing>
         </div>
         <button id="show-tiles">show tiles</button>
         <button id="print-hex-data">print hex data</button>

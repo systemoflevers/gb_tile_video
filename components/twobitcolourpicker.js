@@ -60,13 +60,6 @@ export class TwoBitColourPicker extends HTMLElement {
     this.shadow.appendChild(template.content.cloneNode(true));
   }
 
-  get targetID() {
-    return this.getAttribute('target-id');
-  }
-  set targetID(value) {
-    this.setAttribute('target-id', value);
-  }
-
   connectedCallback() {
     const pickerDiv = this.shadow.getElementById('colour-picker');
     pickerDiv.addEventListener('change', this.colourChangeHandler.bind(this));
@@ -74,51 +67,8 @@ export class TwoBitColourPicker extends HTMLElement {
 
   colourChangeHandler(ev) {
     const colourID = parseInt(ev.target.value);
-    this.updateMatchingPickers(colourID);
-    this.updateTargetDrawings(colourID);
-  }
-
-  updateTargetDrawings(colourID) {
-    for (const targetID of this.targetID?.split(' ')) {
-      const target = this.getRootNode().getElementById(targetID);
-      if (target) {
-        target.setColour(colourID);
-      }
-    }
     const colourChangeEvent = new CustomEvent('colour-change', {detail: colourID});
     this.dispatchEvent(colourChangeEvent);
-  }
-
-  updateMatchingPickers(colourID) {
-    for (const targetID of this.targetID?.split(' ')) {
-      // Tell other colour pickers that are for the same target to change.
-      // Maybe this logic should be in the target?
-      const allMatchingPickers =
-          this.getRootNode().querySelectorAll(
-            `two-bit-colour-picker[target-id~=${targetID}]`);
-      for (const picker of allMatchingPickers) {
-        if (picker === this) continue;
-        picker.setColourChecked(colourID);
-      }
-    }
-  }
-
-  /**
-   * Sets a colour as selected.
-   * This will propagate the change to all target drawings and other matching
-   * pickers if the |colourID| doesn't correspond to the currently selected
-   * colour.
-   */
-  setColourChecked(colourID) {
-    const colourInput = this.shadow.getElementById(`c${colourID}`);
-    if (colourInput.checked) {
-      // Assume everything is up to date and in sync.
-      // This *hopefully* prevents infinite loops.
-      return;
-    }
-    colourInput.checked = true;
-    this.updateMatchingPickers(colourID);
-    this.updateTargetDrawings(colourID);
   }
 }
 

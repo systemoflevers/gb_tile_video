@@ -32,8 +32,8 @@ two-bit-colour-picker {
 }
 </style>
 <div id='container'>
-  <two-bit-drawing id="drawing" width="160" height="144"></two-bit-drawing>
-  <two-bit-colour-picker target-id="drawing"></two-bit-colour-picker>
+  <two-bit-drawing id="drawing" colour-picker-id="colour-picker" width="160" height="144"></two-bit-drawing>
+  <two-bit-colour-picker id="colour-picker"></two-bit-colour-picker>
 </div>
 `
 

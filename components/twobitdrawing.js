@@ -58,6 +58,10 @@ class TwoBitDrawing extends HTMLElement {
         this.isPointerDown = false;
         this.colour = 3;
 
+        // An AbortController used to remove the colour-change when the
+        // colour-picker-id changes or this is removed from a document.  
+        this.colourChangeHandlerController = null;
+
         const toolPickerDiv = shadow.getElementById('tool-picker');
         toolPickerDiv.addEventListener('change', (ev) => {
             this.tool = parseInt(ev.target.value);
@@ -72,9 +76,16 @@ class TwoBitDrawing extends HTMLElement {
         this.nextTile = 1;
     }
 
-    static get observedAttributes() { return ['width', 'height']; }
+    static get observedAttributes() { return ['width', 'height', 'colour-picker-id']; }
     attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue === newValue) return;
+        if (name === 'colour-picker-id') {
+            if (newValue === null) {
+                this.removeColourChangeListener();
+                return;
+            }
+            this.removeAndAddColourChangeListener()
+        }
         console.log('change', name, oldValue, newValue, this[name]);
         this.updateDimensions();
     }
@@ -92,6 +103,34 @@ class TwoBitDrawing extends HTMLElement {
     }
     set width(value) {
         this.setAttribute('width', value);
+    }
+
+    get colourPickerID() {
+        return this.getAttribute('colour-picker-id');
+    }
+    set colourPickerID(value) {
+        return this.setAttribute('colour-picker-id', value);
+    }
+
+    removeColourChangeListener() {
+        this.colourChangeHandlerController?.abort();
+        this.colourChangeHandlerController = null;
+    }
+
+    removeAndAddColourChangeListener() {
+        this.removeColourChangeListener();
+        this.colourChangeHandlerController = new AbortController();
+        this.getRootNode().addEventListener(
+            'colour-change', 
+            this.handleColourChange.bind(this), 
+            {capture: true, signal: this.colourChangeHandlerController.signal});
+    }
+
+    handleColourChange(ev) {
+        if (ev.target.id !== this.colourPickerID) {
+            return
+        }
+        this.colour = ev.detail;
     }
 
     updateDimensions() {
@@ -170,6 +209,18 @@ class TwoBitDrawing extends HTMLElement {
             // doesn't seem to work, maybe when this happens nothing's there to
             // receive the event yet?
             this.dispatchEvent(new CustomEvent('tileSelected', { detail: this.selectedTile }));
+        }
+    }
+
+    disconnectedCallback() {
+        this.removeColourChangeListener();
+    }
+
+    adoptedCallback() {
+        if (this.colourPickerID) {
+            this.removeAndAddColourChangeListener();
+        } else {
+            this.removeColourChangeListener();
         }
     }
 
