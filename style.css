@@ -13,11 +13,12 @@ body {
     margin: auto;
 }
 
-#content, #tile-edit {
-    margin-bottom: 5%;
-}
-
 two-bit-canvas {
     width: 5vw;
     margin:1px;
+}
+
+two-bit-colour-picker {
+    width: 20%;
+    margin: auto;
 }
