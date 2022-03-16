@@ -74,32 +74,51 @@ export class TwoBitColourPicker extends HTMLElement {
 
   colourChangeHandler(ev) {
     const colourID = parseInt(ev.target.value);
+    this.updateMatchingPickers(colourID);
+    this.updateTargetDrawings(colourID);
+  }
+
+  updateTargetDrawings(colourID) {
+    for (const targetID of this.targetID?.split(' ')) {
+      const target = this.getRootNode().getElementById(targetID);
+      if (target) {
+        target.setColour(colourID);
+      }
+    }
     const colourChangeEvent = new CustomEvent('colour-change', {detail: colourID});
-    const targetID = this.targetID;
-    if (targetID) {
+    this.dispatchEvent(colourChangeEvent);
+  }
+
+  updateMatchingPickers(colourID) {
+    for (const targetID of this.targetID?.split(' ')) {
       // Tell other colour pickers that are for the same target to change.
       // Maybe this logic should be in the target?
       const allMatchingPickers =
-          this.getRootNode().querySelectorAll(`two-bit-colour-picker[target-id=${targetID}]`)
+          this.getRootNode().querySelectorAll(
+            `two-bit-colour-picker[target-id~=${targetID}]`);
       for (const picker of allMatchingPickers) {
         if (picker === this) continue;
         picker.setColourChecked(colourID);
       }
-
-      const target = this.getRootNode().getElementById(targetID);
-      if (target) {
-        target.setColour(colourID);
-        return;
-      }
     }
-    this.dispatchEvent(colourChangeEvent);
   }
 
   /**
-   * Sets a colour as selected. This shouldn't trigger a colour changed event.
+   * Sets a colour as selected.
+   * This will propagate the change to all target drawings and other matching
+   * pickers if the |colourID| doesn't correspond to the currently selected
+   * colour.
    */
   setColourChecked(colourID) {
-    this.shadow.getElementById(`c${colourID}`).checked = true;
+    const colourInput = this.shadow.getElementById(`c${colourID}`);
+    if (colourInput.checked) {
+      // Assume everything is up to date and in sync.
+      // This *hopefully* prevents infinite loops.
+      return;
+    }
+    colourInput.checked = true;
+    this.updateMatchingPickers(colourID);
+    this.updateTargetDrawings(colourID);
   }
 }
 
