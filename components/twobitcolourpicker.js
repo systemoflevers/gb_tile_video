@@ -4,7 +4,6 @@ template.innerHTML = `
 <style>
 :host {
   display: block;
-  --select-lift: 30%;
 }
 #colour-picker {
   display: flex;
@@ -27,7 +26,7 @@ template.innerHTML = `
 }
 
 #colour-picker input:checked ~ label>div {
-    margin-bottom: var(--select-lift); 
+    margin-bottom: var(--select-lift, 30%); 
 }
 #swatch-0 {
     background-color: rgb(224, 248, 208);
