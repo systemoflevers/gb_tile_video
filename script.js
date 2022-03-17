@@ -17,6 +17,7 @@ function doStuff() {
     const nextTile = document.getElementById('next-tile');
     nextTile.addEventListener('click', (ev) => {
         drawing.getNextTile();
+        updateTileSummary()
     });
     const printHex = document.getElementById('print-hex-data');
     printHex.addEventListener('click', (ev) => {
@@ -32,13 +33,26 @@ function doStuff() {
         tile.tileMap.tileSet.tiles[0] = tileData;
         tile.needRedraw = true;
     }
+    updateTileSummary();
     drawing.addEventListener('tileSelected', (ev) => {
         const tileData = drawing.tileMap.tileSet.tiles[ev.detail];
         tile.tileMap.tileSet.tiles[0] = tileData;
         tile.needRedraw = true;
+        updateTileSummary();
     });
     tile.addEventListener('needRedraw', (ev) => drawing.updateTile(drawing.selectedTile));
     drawing.addEventListener('needRedraw', (ev) => tile.needRedraw = true);
+}
+
+function updateTileSummary() {
+    const container = document.getElementById('tile-summary');
+    const drawing = document.getElementById('main');
+    const selected = drawing.selectedTile;
+    const nextTile = drawing.nextTile;
+    const total = drawing.tileMap.tileCount;
+
+    container.innerHTML = '';
+    container.innerText = `selected: ${selected} next: ${nextTile} of ${total}`;
 }
 
 
