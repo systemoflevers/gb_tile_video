@@ -10,6 +10,10 @@ function doStuff() {
         showButton.hidden = true;
     });
     const drawing = document.querySelector('two-bit-drawing');
+    const toolPicker = document.querySelector('tool-picker');
+    toolPicker.addEventListener('tool-change', (ev) => {
+        drawing.tool = ev.detail;
+    });
     const nextTile = document.getElementById('next-tile');
     nextTile.addEventListener('click', (ev) => {
         drawing.getNextTile();

@@ -25,19 +25,53 @@ two-bit-colour-picker {
     position: absolute;
     width: 37%;
 }
+svg {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
 </style>
 <div id="container">
 <two-bit-canvas></two-bit-canvas>
-<div id="tool-picker">
-<span><input type="radio" name="tool" id="pencil" value="0" checked />
-<label for="pencil">pencil</label></span>
-<span><input type="radio" name="tool" id="tile-select" value="1" />
-<label for="tile-select">tile-select</label></span>
-<span><input type="radio" name="tool" id="tile-place" value="2" />
-<label for="tile-place">place tile</label></span>
+<div id="grid-container">
+<svg width="100%" height="100%">
+  <defs>
+    <pattern id="v-grid-lines" x="0" y="0" width="5%" height="100%" patternUnits="userSpaceOnUse">
+      <line x1="5%" y1="0%" x2="5%" y2="100%" stroke="black" stroke-width="1"/>
+    </pattern>
+    <pattern id="h-grid-lines" x="0" y="0" width="100%" height="5%" patternUnits="userSpaceOnUse">
+    <line x1="0%" y1="5%" x2="100%" y2="5%" stroke="black" stroke-width="1"/>
+  </pattern>
+  </defs>
+  <rect fill="url(#v-grid-lines)" width="99%" height="100%"/>
+  <rect fill="url(#h-grid-lines)" width="100%" height="99%"/>
+</svg>
 </div>
 </div>
 `;
+
+function getGridSVG(widthDivisions, heightDivisions) {
+  const widthRatio = 100 / widthDivisions;
+  const heightRatio = 100 / heightDivisions;
+
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('width', '100%');
+  svg.setAttribute('height', '100%');
+  svg.innerHTML = `
+  <defs>
+    <pattern id="v-grid-lines" x="0" y="0" width="${widthRatio}%" height="100%" patternUnits="userSpaceOnUse">
+      <line x1="${widthRatio}%" y1="0%" x2="${widthRatio}%" y2="100%" stroke="black" stroke-width="1"></line>
+    </pattern>
+    <pattern id="h-grid-lines" x="0" y="0" width="100%" height="${heightRatio}%" patternUnits="userSpaceOnUse">
+    <line x1="0%" y1="${heightRatio}%" x2="100%" y2="${heightRatio}%" stroke="black" stroke-width="1"></line>
+  </pattern>
+  </defs>
+  <rect fill="url(#v-grid-lines)" width="99%" height="100%"></rect>
+  <rect fill="url(#h-grid-lines)" width="100%" height="99%"></rect>`;
+  return svg;
+}
+
 
 function convertCoordinate(point, origin, boundingLength, pixelLength) {
     const v = Math.floor(((point - origin) / boundingLength) * pixelLength);
@@ -62,10 +96,6 @@ class TwoBitDrawing extends HTMLElement {
         // colour-picker-id changes or this is removed from a document.  
         this.colourChangeHandlerController = null;
 
-        const toolPickerDiv = shadow.getElementById('tool-picker');
-        toolPickerDiv.addEventListener('change', (ev) => {
-            this.tool = parseInt(ev.target.value);
-        });
         this.lastPoint = null;
         this.needRedraw = false;
         this.changedTiles = new Set();
@@ -76,7 +106,7 @@ class TwoBitDrawing extends HTMLElement {
         this.nextTile = 1;
     }
 
-    static get observedAttributes() { return ['width', 'height', 'colour-picker-id']; }
+    static get observedAttributes() { return ['width', 'height', 'colour-picker-id', 'show-pixel-grid', 'show-tile-grid']; }
     attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue === newValue) return;
         if (name === 'colour-picker-id') {
@@ -112,6 +142,13 @@ class TwoBitDrawing extends HTMLElement {
         return this.setAttribute('colour-picker-id', value);
     }
 
+    get showPixelGrid() {
+      return this.hasAttribute('show-pixel-grid');
+    }
+    get showTileGrid() {
+      return this.hasAttribute('show-tile-grid');
+    }
+
     removeColourChangeListener() {
         this.colourChangeHandlerController?.abort();
         this.colourChangeHandlerController = null;
@@ -145,6 +182,15 @@ class TwoBitDrawing extends HTMLElement {
             this.height = 8 * Math.ceil(this.height / 8);
             return;
         }
+        const svgContainer = this.shadowRoot.getElementById('grid-container');
+        svgContainer.innerHTML = '';
+        if (this.showTileGrid) {
+          svgContainer.appendChild(getGridSVG(this.width / 8, this.height / 8));
+        }
+        if (this.showPixelGrid) {
+          svgContainer.appendChild(getGridSVG(this.width, this.height));
+        }
+
         this.twoBitCanvas.width = this.width;
         this.twoBitCanvas.height = this.height
 
