@@ -27,12 +27,17 @@ function doStuff() {
         console.log(drawing.twoBitCanvas.getGBDataAsB64());
     });
     tile = document.getElementById('tile-drawing');
+    if (drawing.selectedTile != null) {
+        const tileData = drawing.tileMap.tileSet.tiles[drawing.selectedTile];
+        tile.tileMap.tileSet.tiles[0] = tileData;
+        tile.needRedraw = true;
+    }
     drawing.addEventListener('tileSelected', (ev) => {
         const tileData = drawing.tileMap.tileSet.tiles[ev.detail];
         tile.tileMap.tileSet.tiles[0] = tileData;
         tile.needRedraw = true;
     });
-    tile.addEventListener('needRedraw', (ev) => drawing.needRedraw = true);
+    tile.addEventListener('needRedraw', (ev) => drawing.updateTile(drawing.selectedTile));
     drawing.addEventListener('needRedraw', (ev) => tile.needRedraw = true);
 }
 

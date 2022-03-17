@@ -350,6 +350,11 @@ class TwoBitDrawing extends HTMLElement {
         return this.tileMap.tileSet;
     }
 
+    updateTile(tileIndex) {
+      this.changedTiles.add(tileIndex);
+      this.needRedraw = true;
+    }
+
     setTwoBitData(twoBitData) {
         if (twoBitData.length != this.width * this.height) {
             return;
