@@ -192,7 +192,7 @@ class TwoBitDrawing extends HTMLElement {
 
     drawGrid() {
       const svgContainer = this.shadowRoot.getElementById('grid-container');
-      svgContainer.innerHTML = '';
+      svgContainer.replaceChildren();
       if (this.showTileGrid) {
         svgContainer.appendChild(getGridSVG(this.width / 8, this.height / 8));
       }
@@ -244,6 +244,8 @@ class TwoBitDrawing extends HTMLElement {
 
         this.updateDimensions();
         const draw = () => {
+            const grid = this.shadowRoot.querySelector('#grid-container > svg');
+            grid.replaceWith(grid);
             if (this.needRedraw) {
                 this.twoBitCanvas.setTwoBitData(this.tileMap.toPixelArray());
                 this.needRedraw = false;
