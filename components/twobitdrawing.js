@@ -244,8 +244,10 @@ class TwoBitDrawing extends HTMLElement {
 
         this.updateDimensions();
         const draw = () => {
-            const grid = this.shadowRoot.querySelector('#grid-container > svg');
-            grid.replaceWith(grid);
+            if (this.showPixelGrid || this.showTileGrid) {
+              const grid = this.shadowRoot.querySelector('#grid-container > svg');
+              grid?.replaceWith(grid);
+            }
             if (this.needRedraw) {
                 this.twoBitCanvas.setTwoBitData(this.tileMap.toPixelArray());
                 this.needRedraw = false;
