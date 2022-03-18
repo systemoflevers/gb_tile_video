@@ -19,6 +19,22 @@ function doStuff() {
         drawing.getNextTile();
         updateTileSummary()
     });
+    const showGBData = document.getElementById('show-gb-data');
+    showGBData.addEventListener('click', (ev) => {
+        const gbDataDiv = document.getElementById('gb-data');
+        const redrawHandler = (ev) => {
+            const gbData = drawing.getB64JSONGBData();
+            gbDataDiv.innerText = gbData;
+        };
+        drawing.addEventListener('needRedraw', redrawHandler);
+        showGBData.hidden = true;
+        redrawHandler();
+    });
+    const downloadLink = document.getElementById('download-link');
+    drawing.addEventListener('needRedraw', (ev) => {
+        const gbData = drawing.getB64JSONGBData();
+        downloadLink.href = `data:application/json,${gbData}`;
+    });
     const printHex = document.getElementById('print-hex-data');
     printHex.addEventListener('click', (ev) => {
         console.log(drawing.twoBitCanvas.getGBDataAsHex());
@@ -49,7 +65,7 @@ function updateTileSummary() {
     const drawing = document.getElementById('main');
     const selected = drawing.selectedTile;
     const nextTile = drawing.nextTile;
-    const total = drawing.tileMap.tileCount;
+    const total = drawing.tileMap.tileSet.tileCount;
 
     container.innerHTML = '';
     container.innerText = `selected: ${selected} next: ${nextTile} of ${total}`;

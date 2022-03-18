@@ -39,7 +39,7 @@ class TileMap {
     }
 
     static makeSimpleMap(widthInTiles, heightInTiles) {
-        const tileCount = widthInTiles * heightInTiles;
+        const tileCount = 256;
         const tileSet = new TileSet(tileCount);
         const tileMap = new TileMap(widthInTiles, heightInTiles, tileSet);
         tileMap.tileMap.forEach((v, i, arr) => {
@@ -116,6 +116,10 @@ class TileMap {
         return pixelArray;
     }
 
+    /**
+     * @returns The map and tile set in the GameBoy binary graphics format,
+     *     stored as Uint8Arrays. Truncates the tile indexes to 1 byte each.
+     */
     toGBData() {
         const tileMap = new Uint8Array(this.tileCount);
         for (let i = 0; i < this.tileCount; ++i) {
@@ -136,6 +140,7 @@ class TileMap {
 class TileSet {
     constructor(tileCount) {
         this.tileBytes = new Uint8Array(tileCount * 64);
+        this.tileCount = tileCount;
         this.tiles = new Array(tileCount);
         for (let i = 0; i < tileCount; i++) {
             this.tiles[i] = this.tileBytes.subarray(i * 64, (i + 1) * 64);

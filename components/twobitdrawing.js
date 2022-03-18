@@ -388,7 +388,7 @@ class TwoBitDrawing extends HTMLElement {
       map: arrayBufferToBase64(map),
       tiles: arrayBufferToBase64(tiles),
     };
-    return JSON.stringify(encodedGBData);
+    return JSON.stringify(encodedGBData, null, 2);
   }
 
   fromB64JSONGBData(jsonGBData) {
