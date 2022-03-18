@@ -182,19 +182,23 @@ class TwoBitDrawing extends HTMLElement {
             this.height = 8 * Math.ceil(this.height / 8);
             return;
         }
-        const svgContainer = this.shadowRoot.getElementById('grid-container');
-        svgContainer.innerHTML = '';
-        if (this.showTileGrid) {
-          svgContainer.appendChild(getGridSVG(this.width / 8, this.height / 8));
-        }
-        if (this.showPixelGrid) {
-          svgContainer.appendChild(getGridSVG(this.width, this.height));
-        }
+        this.drawGrid();
 
         this.twoBitCanvas.width = this.width;
         this.twoBitCanvas.height = this.height
 
         this.tileMap = TileMap.makeSimpleMap(this.width / 8, this.height / 8);
+    }
+
+    drawGrid() {
+      const svgContainer = this.shadowRoot.getElementById('grid-container');
+      svgContainer.innerHTML = '';
+      if (this.showTileGrid) {
+        svgContainer.appendChild(getGridSVG(this.width / 8, this.height / 8));
+      }
+      if (this.showPixelGrid) {
+        svgContainer.appendChild(getGridSVG(this.width, this.height));
+      }
     }
 
     setColour(colourID) {
@@ -256,6 +260,8 @@ class TwoBitDrawing extends HTMLElement {
             // receive the event yet?
             this.dispatchEvent(new CustomEvent('tileSelected', { detail: this.selectedTile }));
         }
+        const mql = window.matchMedia('(orientation: portrait');
+        mql.addEventListener('change', this.drawGrid.bind(this));
     }
 
     disconnectedCallback() {
