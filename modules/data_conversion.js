@@ -125,7 +125,8 @@ class TileMap {
         for (let i = 0; i < this.tileCount; ++i) {
             tileMap[i] = this.tileMap[i];
         }
-        return {map: tileMap, tiles: this.tileSet.toGBTileData()};
+        const usedTileCount = Math.max(...this.tileMap) + 1;
+        return {map: tileMap, tiles: this.tileSet.toGBTileData(usedTileCount)};
     }
 
     fromGBData(tileMap, tiles) {
