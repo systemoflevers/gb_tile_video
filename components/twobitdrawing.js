@@ -250,9 +250,11 @@ class TwoBitDrawing extends HTMLElement {
       }
       if (this.needRedraw) {
         this.twoBitCanvas.setTwoBitData(this.tileMap.toPixelArray());
+        if (this.changedTiles.size > 0) {
+          this.dispatchEvent(new CustomEvent('needRedraw', { detail: this.changedTiles }));
+          this.changedTiles = new Set();
+        }
         this.needRedraw = false;
-        this.dispatchEvent(new CustomEvent('needRedraw', { detail: this.changedTiles }));
-        this.changedTiles = new Set();
       }
       requestAnimationFrame(draw);
     };

@@ -158,9 +158,12 @@ class TileSet {
     /**
      * Gets the tile data in GameBoy's graphics format (2BPP).
      */
-    toGBTileData() {
-        const gbTileData = new Uint8Array(this.tiles.length * 16);
-        for (let i = 0; i < this.tiles.length; i++) {
+    toGBTileData(tileCount) {
+        if (!tileCount) {
+            tileCount = this.tileCount;
+        }
+        const gbTileData = new Uint8Array(tileCount * 16);
+        for (let i = 0; i < tileCount; i++) {
             const gbTile = gbTileData.subarray(i * 16, (i + 1) * 16);
             byteTileToGBTile(this.tiles[i], gbTile);
         }

@@ -26,6 +26,12 @@ body {
     margin: auto;
 }
 
+#gb-data {
+    white-space: pre-wrap;
+    width: 100vh;
+    overflow-wrap: anywhere;
+}
+
 two-bit-canvas {
     width: 5vw;
     margin:1px;
