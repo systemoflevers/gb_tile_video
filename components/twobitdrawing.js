@@ -309,6 +309,8 @@ class TwoBitDrawing extends HTMLElement {
       // is so we can change what's being displayed there.
       const tileIndex = this.tileMap.toMapIndex(x, y);
       this.needRedraw = true;
+      // This is a lie, but it makes sure that a redraw event is fired.
+      this.changedTiles.add(this.selectedTile);
       this.tileMap.tileMap[tileIndex] = this.selectedTile;//this.tileMap.tileMap[this.selectedTile];
       return;
     }
@@ -362,7 +364,7 @@ class TwoBitDrawing extends HTMLElement {
     return this.tileMap.tileSet;
   }
 
-  updateTile(tileIndex) {
+  updateTile(tileIndex) { 
     this.changedTiles.add(tileIndex);
     this.needRedraw = true;
   }
