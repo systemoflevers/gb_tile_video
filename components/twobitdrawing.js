@@ -1,5 +1,5 @@
 import { TwoBitCanvas } from './twobitcanvas.js';
-import { arrayBufferToBase64, base64ToUint8Array, TileMap } from '../modules/data_conversion.js';
+import { arrayBufferToBase64, base64ToUint8Array, TileMap, arrayBufferToHexString } from '../modules/data_conversion.js';
 
 const template = document.createElement('template');
 template.innerHTML = `
@@ -395,10 +395,19 @@ class TwoBitDrawing extends HTMLElement {
     return JSON.stringify(encodedGBData, null, 2);
   }
 
+  getHexJSONData() {
+    const { map, tiles } = this.getGBData();
+    const encodedGBData = {
+      map: arrayBufferToHexString(map, ',', '$'),
+      tiles: arrayBufferToHexString(tiles, ',', '$'),
+    };
+    return JSON.stringify(encodedGBData, null, 2);
+  }
+
   fromB64JSONGBData(jsonGBData) {
     const encodedGBData = JSON.parse(jsonGBData);
     this.fromGBData(base64ToUint8Array(encodedGBData.map),
-      base64ToUint8Array(encodedGBData.tiles));
+    base64ToUint8Array(encodedGBData.tiles));
   }
 
   getNextTile() {

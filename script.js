@@ -37,7 +37,7 @@ function doStuff() {
     });
     const printHex = document.getElementById('print-hex-data');
     printHex.addEventListener('click', (ev) => {
-        console.log(drawing.twoBitCanvas.getGBDataAsHex());
+        console.log(drawing.getHexJSONData());
     });
     const printB64 = document.getElementById('print-b64-data');
     printB64.addEventListener('click', (ev) => {
