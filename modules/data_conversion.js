@@ -72,10 +72,33 @@ class TileMap {
         return tileMap;
     }
 
+    /**
+     * Maps an x,y coordinate to an index into the map entry array.
+     */
     toMapIndex(x, y) {
         return Math.floor(y / 8) * this.widthInTiles + Math.floor(x / 8);
     }
 
+    /**
+     * Given an x,y coordinate returns the index of the tile displayed at that
+     * coordinate and maps the coordinate to the tile's 8x8 coordinate space.
+     * 
+     * Example:
+     * All map entries are set to tile 0 (everything is the same tile).
+     * toTileXY(0, 0) = {tileIndex: 0, tileX: 0, tileY: 0}
+     * toTileXY(8, 0) = {tileIndex: 0, tileX: 0, tileY: 0}
+     * toTileXY(0, 8) = {tileIndex: 0, tileX: 0, tileY: 0}
+     * toTileXY(1, 0) = {tileIndex: 0, tileX: 1, tileY: 0}
+     * toTileXY(9, 0) = {tileIndex: 0, tileX: 1, tileY: 0}
+     * 
+     * Each map entry i is set to tile i (all unique tiles) the display is 20x18
+     * tiles.
+     * toTileXY(0, 0) = {tileIndex: 0, tileX: 0, tileY: 0}
+     * toTileXY(8, 0) = {tileIndex: 1, tileX: 0, tileY: 0}
+     * toTileXY(0, 8) = {tileIndex: 20, tileX: 0, tileY: 0}
+     * toTileXY(1, 0) = {tileIndex: 0, tileX: 1, tileY: 0}
+     * toTileXY(9, 0) = {tileIndex: 1, tileX: 1, tileY: 0}
+     */
     toTileXY(x, y) {
         const mapIndex = this.toMapIndex(x, y);
         const tileIndex = this.tileMap[mapIndex];
