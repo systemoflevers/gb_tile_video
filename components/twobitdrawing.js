@@ -188,6 +188,7 @@ class TwoBitDrawing extends HTMLElement {
     this.twoBitCanvas.height = this.height
 
     this.tileMap = TileMap.makeSimpleMap(this.width / 8, this.height / 8);
+    //this.tileMap = TileMap.makeFullMap(this.width / 8, this.height / 8);
   }
 
   drawGrid() {
@@ -282,6 +283,22 @@ class TwoBitDrawing extends HTMLElement {
     }
   }
 
+  /**
+   * Place the current selected tile at the tile position containing the
+   * pixel-canvas coordinate x, y.
+   */
+  placeTile(x, y) {
+      if (x < 0 || x >= this.width) return;
+      if (y < 0 || y >= this.height) return;
+      const tileIndex = this.tileMap.toMapIndex(x, y);
+      if (this.tileMap.tileMap[tileIndex] === this.selectedTile) return;
+      console.log(x, y);
+      this.needRedraw = true;
+      // This is a lie, but it makes sure that a redraw event is fired.
+      this.changedTiles.add(this.selectedTile);
+      this.tileMap.tileMap[tileIndex] = this.selectedTile;
+  }
+
   pointerDownHandler(ev) {
     if (ev.button !== 0) return;
 
@@ -296,56 +313,56 @@ class TwoBitDrawing extends HTMLElement {
     } else if (this.tool === TILE_SELECT) {
       // Use toTileXY to get the index of the tile that's displayed.
       const { tileIndex } = this.tileMap.toTileXY(x, y);
-      //const tileMapIndex = this.tileMap.toMapIndex(x, y);
-      // I don't remember why this indirection is needed...
-      // I think I could just store tileIndex instead.
-      //this.selectedTile = tileMapIndex;
-      //const tileIndex = this.tileMap.tileMap[tileMapIndex];
       this.selectedTile = tileIndex;
       this.dispatchEvent(new CustomEvent('tileSelected', { detail: tileIndex }));
       return;
     } else if (this.tool === TILE_PLACE) {
-      // Use toMapIndex to get the map index for the clicked point. This
-      // is so we can change what's being displayed there.
-      const tileIndex = this.tileMap.toMapIndex(x, y);
-      this.needRedraw = true;
-      // This is a lie, but it makes sure that a redraw event is fired.
-      this.changedTiles.add(this.selectedTile);
-      this.tileMap.tileMap[tileIndex] = this.selectedTile;//this.tileMap.tileMap[this.selectedTile];
+      this.placeTile(x, y);
+      this.twoBitCanvas.onpointermove = this.pointerMoveHandler.bind(this);
+      this.twoBitCanvas.setPointerCapture(ev.pointerId);
       return;
     }
   }
 
   pointerUpHandler(ev) {
     if (ev.button !== 0) return;
-    if (this.lastPoint === null) return;
-    this.needRedraw = true;
     const { x, y } = this.getMousePos(ev);
-
-    this.drawLine(this.lastPoint, { x, y });
-    this.lastPoint = null;
     this.twoBitCanvas.onpointermove = null;
+    if (this.tool === PENCIL) {
+      if (this.lastPoint === null) return;
+      this.needRedraw = true;
+
+      this.drawLine(this.lastPoint, { x, y });
+      this.lastPoint = null;
+    } else if (this.tool === TILE_PLACE) {
+      this.placeTile(x, y);
+    }
   }
 
   pointerMoveHandler(event) {
-    this.needRedraw = true;
-    if (event.getCoalescedEvents) {
-      const events = event.getCoalescedEvents();
-      if (events.length > 0) {
-        for (let e of events) {
-          const { x, y } = this.getMousePos(event);
-          if (this.lastPoint.x === x && this.lastPoint.y === y) {
-            continue;
+    if (this.tool === PENCIL) {
+      this.needRedraw = true;
+      if (event.getCoalescedEvents) {
+        const events = event.getCoalescedEvents();
+        if (events.length > 0) {
+          for (let e of events) {
+            const { x, y } = this.getMousePos(event);
+            if (this.lastPoint.x === x && this.lastPoint.y === y) {
+              continue;
+            }
+            this.drawLine(this.lastPoint, { x, y });
+            this.lastPoint = { x, y };
           }
-          this.drawLine(this.lastPoint, { x, y });
-          this.lastPoint = { x, y };
+          return;
         }
-        return;
       }
+      const { x, y } = this.getMousePos(event);
+      this.drawLine(this.lastPoint, { x, y });
+      this.lastPoint = { x, y };
+    } else if (this.tool === TILE_PLACE) {
+      const { x, y } = this.getMousePos(event);
+      this.placeTile(x, y);
     }
-    const { x, y } = this.getMousePos(event);
-    this.drawLine(this.lastPoint, { x, y });
-    this.lastPoint = { x, y };
   }
 
   /**
