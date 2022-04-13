@@ -1,6 +1,6 @@
 import { TwoBitCanvas } from './twobitcanvas.js';
-import { arrayBufferToBase64, base64ToUint8Array, TileMap, arrayBufferToHexString } from '../modules/data_conversion.js';
-
+import { arrayBufferToBase64, base64ToUint8Array, arrayBufferToHexString } from '../modules/data_conversion.js';
+import {TileMap}  from '../modules/tile_collections.js';
 const template = document.createElement('template');
 template.innerHTML = `
 <style>

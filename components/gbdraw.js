@@ -1,6 +1,7 @@
 import { TwoBitDrawing } from './twobitdrawing.js';
 import { TwoBitColourPicker } from './twobitcolourpicker.js';
-import { arrayBufferToBase64, base64ToUint8Array, TileMap } from '../modules/data_conversion.js';
+import { arrayBufferToBase64, base64ToUint8Array } from '../modules/data_conversion.js';
+import {TileMap}  from '../modules/tile_collections.js';
 
 const template = document.createElement('template');
 template.innerHTML = `
