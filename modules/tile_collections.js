@@ -1,3 +1,5 @@
+import {byteTileToGBTile, gbTileToByteTile} from './data_conversion.js';
+
 class TileMap {
   constructor(widthInTiles, heightInTiles, tileSet) {
     this.tileSet = tileSet;
@@ -77,6 +79,10 @@ class TileMap {
     return { tileIndex, tileX, tileY };
   }
 
+  setTile(mapIndex, tileIndex) {
+    this.tileMap[mapIndex] = tileIndex;
+  }
+
   setPixel(x, y, v) {
     const { tileIndex, tileX, tileY } = this.toTileXY(x, y);
     this.tileSet.setPixel(tileIndex, tileX, tileY, v);
@@ -131,6 +137,77 @@ class TileMap {
   }
 }
 
+/**
+ * A tile map that will copy a tile whenever it's shared and modified. So if
+ * two map entries point to the same tile (tile-0) and there's a setPixel() call
+ * that  sets a pixel in the 1st map entry it will cause the existing tile's
+ * content to be copied to a "fresh", unused tile (tile-1). The 1st map entry
+ * will be updated to point to tile-1 and setPixel() will modify tile-1.
+ * 
+ * If there are no more unused tiles then it just modifies the shared tile.
+ */
+class CopyOnWriteMap extends TileMap {
+  constructor(widthInTiles, heightInTiles, tileSet) {
+    super(widthInTiles, heightInTiles, tileSet);
+    this.reverseMap = new Array(this.tileSet.tileCount);
+    for (let i = 0; i < this.reverseMap.length; ++i) {
+      this.reverseMap[i] = new Set();
+    }
+    this.computeReverseMap();
+  }
+
+  static makeSimpleMap(widthInTiles, heightInTiles) {
+    const tileCount = 256;
+    const tileSet = new TileSet(tileCount);
+    const tileMap = new CopyOnWriteMap(widthInTiles, heightInTiles, tileSet);
+    tileMap.tileMap.forEach((v, i, arr) => {
+      const x = i % widthInTiles;
+      const y = Math.floor(i / widthInTiles);
+      arr[i] = 0; //i;//(x%4) + 4*(y%4);
+    });
+    return tileMap;
+  }
+
+  computeReverseMap() {
+    for (let i = 0; i < this.tileMap.length; ++i) {
+      const tileIndex = this.tileMap[i];
+      this.reverseMap[tileIndex].add(i);
+    }
+  }
+
+  copyToUnusedTileIfNeeded(mapIndex) {
+    const tileIndex = this.tileMap[mapIndex];
+    if (this.reverseMap[tileIndex].size <= 1) {
+      return;
+    }
+    const unusedTileIndex = this.reverseMap.findIndex(
+      (mapEntries) => mapEntries.size === 0);
+    if (unusedTileIndex < 0) {
+      // No unused tiles, do nothing.
+      return;
+    }
+
+    const oldTile = this.tileSet.tiles[tileIndex];
+    const newTile = this.tileSet.tiles[unusedTileIndex];
+    newTile.set(oldTile);
+    this.tileMap[mapIndex] = unusedTileIndex;
+    this.reverseMap[unusedTileIndex].add(mapIndex);
+    this.reverseMap[tileIndex].delete(mapIndex);
+  }
+
+  setPixel(x, y, v) {
+    const mapIndex = this.toMapIndex(x, y);
+    this.copyToUnusedTileIfNeeded(mapIndex);
+    return super.setPixel(x, y, v);
+  }
+
+  setTile(mapIndex, tileIndex) {
+    this.reverseMap[this.tileMap[mapIndex]].delete(mapIndex);
+    this.reverseMap[tileIndex].add(mapIndex);
+    super.setTile(mapIndex, tileIndex);
+  }
+}
+
 class TileSet {
   constructor(tileCount) {
     this.tileBytes = new Uint8Array(tileCount * 64);
@@ -176,5 +253,6 @@ class TileSet {
 
 export {
   TileMap,
+  CopyOnWriteMap,
   TileSet,
 }

@@ -1,6 +1,6 @@
 import { TwoBitCanvas } from './twobitcanvas.js';
 import { arrayBufferToBase64, base64ToUint8Array, arrayBufferToHexString } from '../modules/data_conversion.js';
-import {TileMap}  from '../modules/tile_collections.js';
+import {TileMap, CopyOnWriteMap}  from '../modules/tile_collections.js';
 const template = document.createElement('template');
 template.innerHTML = `
 <style>
@@ -187,7 +187,8 @@ class TwoBitDrawing extends HTMLElement {
     this.twoBitCanvas.width = this.width;
     this.twoBitCanvas.height = this.height
 
-    this.tileMap = TileMap.makeSimpleMap(this.width / 8, this.height / 8);
+    this.tileMap = CopyOnWriteMap.makeSimpleMap(this.width / 8, this.height / 8);
+    //this.tileMap = TileMap.makeSimpleMap(this.width / 8, this.height / 8);
     //this.tileMap = TileMap.makeFullMap(this.width / 8, this.height / 8);
   }
 
@@ -296,7 +297,7 @@ class TwoBitDrawing extends HTMLElement {
       this.needRedraw = true;
       // This is a lie, but it makes sure that a redraw event is fired.
       this.changedTiles.add(this.selectedTile);
-      this.tileMap.tileMap[tileIndex] = this.selectedTile;
+      this.tileMap.setTile(tileIndex, this.selectedTile);
   }
 
   pointerDownHandler(ev) {
