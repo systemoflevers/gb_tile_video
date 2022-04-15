@@ -48,7 +48,7 @@ export class TwoBitCanvas extends HTMLElement {
         //const imageData = ctx.createImageData(this.width, this.height);
         //this.imageData = imageData;
         this.ctx = ctx;
-        this.colours = colours;
+        this.colours = [...colours];
         if (this.width && this.height) {
             this.updateDimensions();
         }

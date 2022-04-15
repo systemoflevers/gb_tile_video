@@ -114,7 +114,12 @@ class TwoBitDrawing extends HTMLElement {
         this.removeColourChangeListener();
         return;
       }
-      this.removeAndAddColourChangeListener()
+      this.removeAndAddColourChangeListener();
+      return;
+    }
+    if (name === 'show-pixel-grid' || name === 'show-tile-grid') {
+      this.drawGrid();
+      return;
     }
     console.log('change', name, oldValue, newValue, this[name]);
     this.updateDimensions();
