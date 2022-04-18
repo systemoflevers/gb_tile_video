@@ -52,6 +52,11 @@ TEMPLATE.innerHTML = `
   <input id="show-grid" type="checkbox" /><label for="show-grid">show grid</label>
 </span>
 <text-tile></text-tile>
+<span id="text-mode-inputs">
+<input id="text-mode-z-to-t" type="radio" name="text-mode" value="ZeroToThree" /><label for="text-mode-z-to-t">0-3 pixels</label>
+<input id="text-mode-2bpp-bin" type="radio" name="text-mode" value="2BPPBin" /><label for="text-mode-2bpp-bin">GB 2BPP binary</label>
+<input id="text-mode-2bpp-dec" type="radio" name="text-mode" value="2BPPDec" /><label for="text-mode-2bpp-dec">GB 2BPP decimal</label>
+<input id="text-mode-2bpp-hex" type="radio" name="text-mode" value="2BPPHex" /><label for="text-mode-2bpp-hex">GB 2BPP hex</label>
 </div>
 `;
 
@@ -59,9 +64,9 @@ class TileDemo extends HTMLElement {
   constructor() {
     super();
 
-    const shadow = this.attachShadow({mode: 'open'});
+    const shadow = this.attachShadow({ mode: 'open' });
     shadow.appendChild(TEMPLATE.content.cloneNode(true));
-    
+
     this.drawing = this.shadowRoot.getElementById('drawing');
     this.highBitCanvas = this.shadowRoot.getElementById('high-bit-canvas');
     this.highBitCanvas.colours[1] = this.highBitCanvas.colours[0];
@@ -69,6 +74,7 @@ class TileDemo extends HTMLElement {
     this.lowBitCanvas = this.shadowRoot.getElementById('low-bit-canvas');
     this.lowBitCanvas.colours[1] = this.lowBitCanvas.colours[3];
     this.lowBitCanvas.colours[2] = this.lowBitCanvas.colours[0];
+    this.textTile = this.shadowRoot.querySelector('text-tile');
   }
 
   connectedCallback() {
@@ -82,6 +88,12 @@ class TileDemo extends HTMLElement {
       console.log(showGridCheckbox.checked);
     });
 
+    this.shadowRoot.getElementById('text-mode-inputs').addEventListener('change',
+      (ev) => {
+        this.textTile.mode = ev.target.value;
+        this.textTile.redraw();
+      });
+
     this.drawing.addEventListener('needRedraw', (ev) => {
       this.renderTextEncoding();
       const twoBitData = this.drawing.twoBitCanvas.twoBitData;
@@ -92,7 +104,7 @@ class TileDemo extends HTMLElement {
   }
 
   renderTextEncoding() {
-    this.shadowRoot.querySelector('text-tile').setTwoBitData(
+    this.textTile.setTwoBitData(
       this.drawing.twoBitCanvas.twoBitData);
   }
 }
