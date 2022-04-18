@@ -2,8 +2,8 @@ import { byteTileToGBTile, arrayBufferToHexString, arrayBufferToString } from '.
 
 const TEMPLATE = document.createElement('template');
 TEMPLATE.innerHTML = `
-<div>
-</div>
+<pre>
+</pre>
 `;
 
 const ModeZeroToThree = 'ZeroToThree';
@@ -16,7 +16,7 @@ export class TextTile extends HTMLElement {
     super();
     const shadow = this.attachShadow({ mode: 'open' });
     shadow.appendChild(TEMPLATE.content.cloneNode(true));
-    this.container = shadow.querySelector('div');
+    this.container = shadow.querySelector('pre');
     this.mode = Mode2BPPBin;
   }
 
@@ -53,9 +53,7 @@ export class TextTile extends HTMLElement {
       for (let i = 0; i < 8; ++i) {
         pixelLines.push(this.twoBitData.subarray(i * 8, (i + 1) * 8).join(''));
       }
-      const pre = document.createElement('pre');
-      pre.replaceChildren(pixelLines.join('\n'));
-      this.container.replaceChildren(pre);
+      this.container.replaceChildren(pixelLines.join('\n'));
       return;
     }
 
@@ -78,9 +76,7 @@ export class TextTile extends HTMLElement {
         const rowBytes = tbpp.subarray(i * 2, (i + 1) * 2);
         textLine.push(arrayBufferToString(rowBytes, base, ' '));
       }
-      const pre = document.createElement('pre');
-      pre.replaceChildren(textLine.join('\n'));
-      this.container.replaceChildren(pre);
+      this.container.replaceChildren(textLine.join('\n'));
       return;
     }
   }
