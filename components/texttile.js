@@ -25,6 +25,28 @@ export class TextTile extends HTMLElement {
     this.redraw();
   }
 
+  useZeroToThreeMode() {
+    this.mode = ModeZeroToThree;
+    this.redraw();
+  }
+
+  use2BPPMode(base) {
+    switch (base) {
+      case (2):
+        this.mode = Mode2BPPBin;
+        break;
+      case (10):
+        this.mode = Mode2BPPDec;
+        break;
+      case (16):
+        this.mode = Mode2BPPHex;
+        break;
+      default:
+        throw new RangeError('base must be 2, 10, or 16');
+    }
+    this.redraw();
+  }
+
   redraw() {
     if (this.mode === ModeZeroToThree) {
       const pixelLines = [];
