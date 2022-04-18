@@ -41,12 +41,12 @@ TEMPLATE.innerHTML = `
 
 <div id="container">
 <div id="canvases">
-  <two-bit-canvas id="high-bit-canvas" width="8" height="8"></two-bit-canvas>
+  <two-bit-canvas id="low-bit-canvas" width="8" height="8"></two-bit-canvas>
   <div id="drawing-container">
     <two-bit-drawing id="drawing" colour-picker-id="colour-picker" width="8" height="8"></two-bit-drawing>
     <two-bit-colour-picker id="colour-picker"></two-bit-colour-picker>
   </div>
-  <two-bit-canvas id="low-bit-canvas" width="8" height="8"></two-bit-canvas>
+  <two-bit-canvas id="high-bit-canvas" width="8" height="8"></two-bit-canvas>
 </div>
 <span>
   <input id="show-grid" type="checkbox" /><label for="show-grid">show grid</label>

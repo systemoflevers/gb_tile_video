@@ -18,16 +18,21 @@ function base64ToUint8Array(b64String) {
     return bytes;
 }
 
-function arrayBufferToHexString(buffer, delimiter = '', prefix = '') {
+function arrayBufferToString(buffer, base, delimiter = '', prefix = '') {
     const bytes = new Uint8Array(buffer);
-    let hexStringArray = [];
+    const encodedByteLength = (255).toString(base).length;
+    let digitArray = [];
     for (const byte of bytes) {
-        let hexByte = byte.toString(16);
-        const padding = hexByte.length < 2 ? '0' : '';
-        hexByte = `${prefix}${padding}${hexByte}`;
-        hexStringArray.push(hexByte);
+        let stringByte = byte.toString(base);
+        const padding = ('0').repeat(encodedByteLength - stringByte.length);
+        stringByte = `${prefix}${padding}${stringByte}`;
+        digitArray.push(stringByte);
     }
-    return hexStringArray.join(delimiter);
+    return digitArray.join(delimiter);
+}
+
+function arrayBufferToHexString(buffer, delimiter = '', prefix = '') {
+    return arrayBufferToString(buffer, 16, delimiter, prefix);
 }
 
 /**
@@ -134,6 +139,7 @@ function gbTileToByteTile(gbTile, opt_byteTile) {
 export {
     arrayBufferToBase64,
     base64ToUint8Array,
+    arrayBufferToString,
     arrayBufferToHexString,
     byteTileToGBTile,
     gbTileToByteTile,

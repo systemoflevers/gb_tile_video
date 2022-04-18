@@ -1,4 +1,4 @@
-import { byteTileToGBTile, arrayBufferToHexString } from '../modules/data_conversion.js';
+import { byteTileToGBTile, arrayBufferToHexString, arrayBufferToString } from '../modules/data_conversion.js';
 
 const TEMPLATE = document.createElement('template');
 TEMPLATE.innerHTML = `
@@ -7,9 +7,9 @@ TEMPLATE.innerHTML = `
 `;
 
 const ModeZeroToThree = 'ZeroToThree';
-// const Mode2BPPDec = '2BPPDec';
+const Mode2BPPBin = '2BPPBin';
+const Mode2BPPDec = '2BPPDec';
 const Mode2BPPHex = '2BPPHex';
-// const Mode2BPPBin = '2BPPBin';
 
 export class TextTile extends HTMLElement {
   constructor() {
@@ -17,7 +17,7 @@ export class TextTile extends HTMLElement {
     const shadow = this.attachShadow({ mode: 'open' });
     shadow.appendChild(TEMPLATE.content.cloneNode(true));
     this.container = shadow.querySelector('div');
-    this.mode = Mode2BPPHex;
+    this.mode = Mode2BPPBin;
   }
 
   setTwoBitData(twoBitData) {
@@ -38,11 +38,23 @@ export class TextTile extends HTMLElement {
     }
 
     if (this.mode.startsWith('2BPP')) {
+      let base = 10;
+      switch (this.mode) {
+        case (Mode2BPPBin):
+          base = 2;
+          break;
+        case (Mode2BPPDec):
+          base = 10;
+          break;
+        case (Mode2BPPHex):
+          base = 16;
+          break;
+      }
       const tbpp = byteTileToGBTile(this.twoBitData);
       const textLine = [];
       for (let i = 0; i < 8; ++i) {
         const rowBytes = tbpp.subarray(i * 2, (i + 1) * 2);
-        textLine.push(arrayBufferToHexString(rowBytes, ' '));
+        textLine.push(arrayBufferToString(rowBytes, base, ' '));
       }
       const pre = document.createElement('pre');
       pre.replaceChildren(textLine.join('\n'));
