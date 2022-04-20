@@ -69,6 +69,13 @@ export class TwoBitColourPicker extends HTMLElement {
     const colourChangeEvent = new CustomEvent('colour-change', {detail: colourID});
     this.dispatchEvent(colourChangeEvent);
   }
+
+  setPalette(colours) {
+    for (let i = 0; i < 4; ++i) {
+      const swatch = this.shadowRoot.getElementById(`swatch-${i}`);
+      swatch.style.backgroundColor = `rgb(${colours[i].join(', ')})`;
+    }
+  }
 }
 
 customElements.define('two-bit-colour-picker', TwoBitColourPicker);

@@ -57,8 +57,52 @@ TEMPLATE.innerHTML = `
 <input id="text-mode-2bpp-bin" type="radio" name="text-mode" value="2BPPBin" /><label for="text-mode-2bpp-bin">GB 2BPP binary</label>
 <input id="text-mode-2bpp-dec" type="radio" name="text-mode" value="2BPPDec" /><label for="text-mode-2bpp-dec">GB 2BPP decimal</label>
 <input id="text-mode-2bpp-hex" type="radio" name="text-mode" value="2BPPHex" /><label for="text-mode-2bpp-hex">GB 2BPP hex</label>
+<div>
+<span id="fade-type-picker">
+  <input id="fade0" type="radio" name="fade-type" value="0" checked /><label for="fade0">fade type 1</label>
+  <input id="fade1" type="radio" name="fade-type" value="1" /><label for="fade1">fade type 2</label>
+</span>
+<input id="fade-slider" type="range" list="fade-options" min="0" max="6" step="1" />
+<datalist id="fade-options">
+<option value="0" label="b"></option>
+<option value="1" ></option>
+<option value="2" ></option>
+<option value="3" label="n"></option>
+<option value="4" ></option>
+<option value="5" ></option>
+<option value="6" label="w"></option>
+</datalist>
+<div>
 </div>
 `;
+
+const kFadePalettes = [
+  [
+    [3, 3, 3, 3],
+    [2, 2, 2, 3],
+    [1, 1, 2, 3],
+    [0, 1, 2, 3],
+    [0, 1, 2, 2],
+    [0, 1, 1, 1],
+    [0, 0, 0, 0],
+  ],
+  [
+    [3, 3, 3, 3],
+    [2, 3, 3, 3],
+    [1, 2, 3, 3],
+    [0, 1, 2, 3],
+    [0, 0, 1, 2],
+    [0, 0, 0, 1],
+    [0, 0, 0, 0],
+  ],
+]
+
+const kColours = [
+  [224, 248, 208],
+  [136, 192, 112],
+  [52, 104, 86],
+  [8, 24, 32],
+]
 
 class TileDemo extends HTMLElement {
   constructor() {
@@ -75,6 +119,9 @@ class TileDemo extends HTMLElement {
     this.lowBitCanvas.colours[1] = this.lowBitCanvas.colours[3];
     this.lowBitCanvas.colours[2] = this.lowBitCanvas.colours[0];
     this.textTile = this.shadowRoot.querySelector('text-tile');
+    this.fadeSlider = this.shadowRoot.getElementById('fade-slider');
+    this.fadeTypePicker = this.shadowRoot.getElementById('fade-type-picker');
+    this.fadeType = 0;
   }
 
   connectedCallback() {
@@ -101,6 +148,27 @@ class TileDemo extends HTMLElement {
       this.highBitCanvas.setTwoBitData(twoBitData);
     });
     this.renderTextEncoding();
+
+    this.fadeTypePicker.addEventListener('change', (ev) => {
+      this.fadeType = parseInt(ev.target.value);
+      this.updateFade();
+    })
+
+    this.fadeSlider.addEventListener('input', (ev) => {
+      this.updateFade();
+    })
+  }
+
+  updateFade() {
+    const fadeLevel = parseInt(this.fadeSlider.value);
+    const fadePalette = kFadePalettes[this.fadeType][fadeLevel];
+    const fadeColours = [];
+    for (const colour of fadePalette) {
+      fadeColours.push(kColours[colour]);
+    }
+    this.drawing.twoBitCanvas.colours = fadeColours;
+    this.drawing.twoBitCanvas.redrawCanvas();
+    this.shadowRoot.getElementById('colour-picker').setPalette(fadeColours);
   }
 
   renderTextEncoding() {
