@@ -72,7 +72,7 @@ TEMPLATE.innerHTML = `
 <option value="5" ></option>
 <option value="6" label="w"></option>
 </datalist>
-<div>
+</div>
 </div>
 `;
 
@@ -95,14 +95,14 @@ const kFadePalettes = [
     [0, 0, 0, 1],
     [0, 0, 0, 0],
   ],
-]
+];
 
 const kColours = [
   [224, 248, 208],
   [136, 192, 112],
   [52, 104, 86],
   [8, 24, 32],
-]
+];
 
 class TileDemo extends HTMLElement {
   constructor() {

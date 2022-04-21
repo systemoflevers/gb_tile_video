@@ -1,4 +1,4 @@
-import { pixelArrayToTiles, arrayBufferToHexString, arrayBufferToBase64 } from '../modules/data_conversion.js';
+import { pixelArrayToTiles, arrayBufferToHexString, arrayBufferToBase64, base64ToUint8Array } from '../modules/data_conversion.js';
 
 const template = document.createElement('template');
 template.innerHTML = `
@@ -98,6 +98,10 @@ export class TwoBitCanvas extends HTMLElement {
         }
         this.twoBitData = twoBitData;
         this.redrawCanvas();
+    }
+    
+    setTwoBitDataFromB64(b64Data) {
+        this.setTwoBitData(base64ToUint8Array(b64Data))
     }
 
     redrawCanvas() {
