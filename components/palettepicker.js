@@ -1,3 +1,4 @@
+import { paletteChangeEvent } from "../modules/colours.js";
 const TEMPLATE = document.createElement('template');
 TEMPLATE.innerHTML = `
 <style>
@@ -70,10 +71,7 @@ export class PalettePicker extends HTMLElement {
       const paletteIndex = parseInt(ev.target.name[1]);
       const choice = parseInt(ev.target.value);
       this.palette[paletteIndex] = choice;
-      const paletteChangeEvent = new CustomEvent(
-        'palette-change',
-        { detail: this.expandPalette() });
-      this.dispatchEvent(paletteChangeEvent);
+      this.dispatchEvent(paletteChangeEvent(this.expandPalette()));
     });
   }
 

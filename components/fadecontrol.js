@@ -1,3 +1,4 @@
+import { paletteChangeEvent } from "../modules/colours.js";
 const TEMPLATE = document.createElement('template');
 TEMPLATE.innerHTML = `
 <span id="fade-type-picker">
@@ -80,10 +81,9 @@ export class FadeControl extends HTMLElement {
   }
 
   updateFade() {
-    if (!this.fadeCallback) return;
-    this.fadeCallback(
-      getFadeColours(
-        this.fadeLevel, kFadePalettes[this.fadeType], this.colours));
+    const colours = getFadeColours(
+      this.fadeLevel, kFadePalettes[this.fadeType], this.colours);
+    this.dispatchEvent(paletteChangeEvent(colours));
   }
 }
 customElements.define('fade-control', FadeControl);

@@ -50,14 +50,15 @@ export class TwoBitAnimate extends HTMLElement {
       pauseButton.hidden = true;
     });
 
-    const showGrid = this.shadowRoot.querySelector('show-grid'); 
+    const showGrid = this.shadowRoot.querySelector('show-grid');
     showGrid.drawing = this.drawing;
     showGrid.pixelGrid = false;
     showGrid.tileGrid = true;
-    this.shadowRoot.querySelector('fade-control').fadeCallback = (colours) => {
-      this.drawing.twoBitCanvas.colours = colours;
-      this.drawing.twoBitCanvas.redrawCanvas();
-    }
+    this.shadowRoot.querySelector('fade-control')
+      .addEventListener('palette-change', (ev) => {
+        this.drawing.twoBitCanvas.colours = ev.detail;
+        this.drawing.twoBitCanvas.redrawCanvas();
+      });
   }
 
   firstFrame(timestamp) {
@@ -75,7 +76,7 @@ export class TwoBitAnimate extends HTMLElement {
   restOfFrames(timestamp) {
     if (!this.play) return;
     const timeSinceStart = timestamp - this.startFrameTime;
-    let frame = Math.floor(timeSinceStart*(60/1000)) + this.startFrame;
+    let frame = Math.floor(timeSinceStart * (60 / 1000)) + this.startFrame;
     if (frame >= this.frameData.length) {
       frame = 0;
       this.startFrame = 0;
