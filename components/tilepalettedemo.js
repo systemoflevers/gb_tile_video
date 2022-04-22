@@ -1,4 +1,4 @@
-import { FadeControl } from "./fade-control.js";
+import { FadeControl } from "./fadecontrol.js";
 import { ShowGrid } from "./showgrid.js";
 import { TwoBitDrawing } from "./twobitdrawing.js";
 import { TwoBitColourPicker } from "./twobitcolourpicker.js";

@@ -30,6 +30,7 @@ svg {
   position: absolute;
   top: 0;
   left: 0;
+  mix-blend-mode: difference;
 }
 </style>
 <div id="container">
@@ -61,10 +62,10 @@ function getGridSVG(widthDivisions, heightDivisions) {
   svg.innerHTML = `
   <defs>
     <pattern id="v-grid-lines" x="0" y="0" width="${widthRatio}%" height="100%" patternUnits="userSpaceOnUse">
-      <line x1="${widthRatio}%" y1="0%" x2="${widthRatio}%" y2="100%" stroke="black" stroke-width="1"></line>
+      <line x1="${widthRatio}%" y1="0%" x2="${widthRatio}%" y2="100%" stroke="white" stroke-width="1"></line>
     </pattern>
     <pattern id="h-grid-lines" x="0" y="0" width="100%" height="${heightRatio}%" patternUnits="userSpaceOnUse">
-    <line x1="0%" y1="${heightRatio}%" x2="100%" y2="${heightRatio}%" stroke="black" stroke-width="1"></line>
+    <line x1="0%" y1="${heightRatio}%" x2="100%" y2="${heightRatio}%" stroke="white" stroke-width="1"></line>
   </pattern>
   </defs>
   <rect fill="url(#v-grid-lines)" width="99%" height="100%"></rect>
@@ -252,8 +253,8 @@ class TwoBitDrawing extends HTMLElement {
     this.updateDimensions();
     const draw = () => {
       if (this.showPixelGrid || this.showTileGrid) {
-        const grid = this.shadowRoot.querySelector('#grid-container > svg');
-        grid?.replaceWith(grid);
+        //const grid = this.shadowRoot.querySelector('#grid-container > svg');
+        //grid?.replaceWith(grid);
       }
       if (this.needRedraw) {
         this.twoBitCanvas.setTwoBitData(this.tileMap.toPixelArray());
