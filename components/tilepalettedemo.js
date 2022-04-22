@@ -4,6 +4,7 @@ import { TwoBitDrawing } from "./twobitdrawing.js";
 import { TwoBitColourPicker } from "./twobitcolourpicker.js";
 import { TwoBitCanvas } from "./twobitcanvas.js";
 import { TextTile } from "./texttile.js";
+import { PalettePicker } from "./palettepicker.js";
 
 const TEMPLATE = document.createElement('template');
 TEMPLATE.innerHTML = `
@@ -34,6 +35,7 @@ TEMPLATE.innerHTML = `
   </div>
   <show-grid></show-grid>
   <fade-control></fade-control>
+  <palette-picker></palette-picker>
 </div>
 `;
 
@@ -50,11 +52,16 @@ class TileFadeDemo extends HTMLElement {
   connectedCallback() {
     const colourPicker = this.shadowRoot.getElementById('colour-picker');
     this.shadowRoot.querySelector('show-grid').drawing = this.drawing;
-    this.shadowRoot.querySelector('fade-control').fadeCallback = (colours) => {
+    const paletteSetter = (colours) => {
       this.drawing.twoBitCanvas.colours = colours;
       this.drawing.twoBitCanvas.redrawCanvas();
       colourPicker.setPalette(colours);
-    }
+    };
+    this.shadowRoot.querySelector('fade-control').fadeCallback = paletteSetter;
+    this.shadowRoot.querySelector('palette-picker')
+      .addEventListener('palette-change', (ev) => {
+        paletteSetter(ev.detail);
+      });
   }
 }
 

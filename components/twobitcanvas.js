@@ -26,7 +26,7 @@ const green2_colours = [
     [136, 192, 112],
     [52, 104, 86],
     [8, 24, 32],
-]
+];
 const grey_colours = [
     [255, 255, 255],
     [171, 171, 171],
@@ -99,7 +99,7 @@ export class TwoBitCanvas extends HTMLElement {
         this.twoBitData = twoBitData;
         this.redrawCanvas();
     }
-    
+
     setTwoBitDataFromB64(b64Data) {
         this.setTwoBitData(base64ToUint8Array(b64Data))
     }
