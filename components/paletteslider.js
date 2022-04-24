@@ -1,4 +1,5 @@
 import { paletteChangeEvent } from "../modules/colours.js";
+import { AnimationController } from "../modules/animation_controller.js";
 const TEMPLATE = document.createElement('template');
 TEMPLATE.innerHTML = `
 <input type="checkbox" id="enable-checkbox" /><label for="enable-checkbox">enable</label>
@@ -9,6 +10,7 @@ TEMPLATE.innerHTML = `
   <option value="2"></option>
   <option value="3"></option>
 </datalist>
+<input type="checkbox" id="animate-checkbox" disabled /><label for="animate-checkbox">animate</label>
 `;
 
 const kColours = [
@@ -29,24 +31,43 @@ export class PaletteSlider extends HTMLElement {
     this.offColour = 0;
     this.onColour = 1;
     this.onIndex = 0;
+    this.slider = this.shadowRoot.getElementById('palette-slider');
+
+    this.animationController = new AnimationController(10, this.animate.bind(this));
   }
 
   connectedCallback() {
-    const slider = this.shadowRoot.getElementById('palette-slider');
-    slider.addEventListener('input', (ev) => {
-        this.onIndex = parseInt(ev.target.value);
-        this.paletteChange();
-      });
+    this.slider.addEventListener('input', (ev) => {
+      this.onIndex = parseInt(ev.target.value);
+      this.paletteChange();
+    });
+    const animateCheckbox = this.shadowRoot.getElementById('animate-checkbox');
+    animateCheckbox.addEventListener('change', (ev) => {
+      if (animateCheckbox.checked) {
+        this.animationController.start();
+      } else {
+        this.animationController.stop();
+      }
+    });
     const enableCheckbox = this.shadowRoot.getElementById('enable-checkbox');
     enableCheckbox.addEventListener('change', () => {
       const enabled = enableCheckbox.checked;
-      slider.disabled = !enabled
+      this.slider.disabled = !enabled
+      animateCheckbox.checked &&= enabled;
+      animateCheckbox.disabled = !enabled;
       if (enabled) {
         this.paletteChange();
       } else {
         this.fireChange(this.colours);
+        this.animationController.stop();
       }
     });
+  }
+
+  animate() {
+    this.onIndex = (this.onIndex + 1 ) % 4;
+    this.slider.value = this.onIndex;
+    this.paletteChange();
   }
 
   paletteChange() {

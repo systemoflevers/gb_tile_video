@@ -7,6 +7,7 @@ import { TextTile } from "./texttile.js";
 import { PalettePicker } from "./palettepicker.js";
 import { PaletteSlider } from "./paletteslider.js";
 import { PaletteToggle } from "./palettetoggle.js";
+import { BigPaletteAnimation } from "./bigpaletteanimation.js";
 
 const TEMPLATE = document.createElement('template');
 TEMPLATE.innerHTML = `
@@ -43,6 +44,7 @@ TEMPLATE.innerHTML = `
     <palette-toggle></palette-toggle>
   </span>
 </div>
+<big-palette-animation></big-palette-animation>
 `;
 
 class TileFadeDemo extends HTMLElement {
