@@ -193,9 +193,9 @@ class TwoBitDrawing extends HTMLElement {
     this.twoBitCanvas.width = this.width;
     this.twoBitCanvas.height = this.height
 
-    this.tileMap = CopyOnWriteMap.makeSimpleMap(this.width / 8, this.height / 8);
+    //this.tileMap = CopyOnWriteMap.makeSimpleMap(this.width / 8, this.height / 8);
     //this.tileMap = TileMap.makeSimpleMap(this.width / 8, this.height / 8);
-    //this.tileMap = TileMap.makeFullMap(this.width / 8, this.height / 8);
+    this.tileMap = TileMap.makeFullMap(this.width / 8, this.height / 8);
   }
 
   drawGrid() {
