@@ -76,7 +76,7 @@ export class PalettePicker extends HTMLElement {
       const paletteIndex = parseInt(ev.target.name[1]);
       const choice = parseInt(ev.target.value);
       this.palette[paletteIndex] = choice;
-      this.dispatchEvent(paletteChangeEvent(this.expandPalette()));
+      this.paletteChange();
     });
   }
 
@@ -88,11 +88,21 @@ export class PalettePicker extends HTMLElement {
     return colours;
   }
 
-  setPalette() {
-    const colourChoices = [];
+  paletteChange() {
+    this.dispatchEvent(paletteChangeEvent(this.expandPalette()));
+  }
+
+  setPalette(palette) {
     for (let i = 0; i < 4; ++i) {
-      colourChoices.push(this.shadowRoot.querySelectorAll(`input[name=c${i}]`));
+      this.palette[i] = palette[i];
+      const inputs =
+        this.shadowRoot.querySelectorAll(`input[type=radio][name=c${i}]`);
+      for (const input of inputs) {
+        if (parseInt(input.value) !== palette[i]) continue;
+        input.checked = true;
+      }
     }
+    this.paletteChange();
   }
 }
 customElements.define('palette-picker', PalettePicker);
