@@ -1,6 +1,6 @@
 class AnimationController {
   constructor(fps, callback) {
-    this.frameLength = 1000/fps;
+    this.frameLength = 1000 / fps;
     this.callback = callback;
     this.requestId = null;
     this.startTime = null;
@@ -18,7 +18,7 @@ class AnimationController {
 
   start() {
     this.stop();
-    this.requestId = requestAnimationFrame(this.boundFrame); 
+    this.requestId = requestAnimationFrame(this.boundFrame);
   }
 
   frame(timestamp) {
@@ -38,6 +38,43 @@ class AnimationController {
   }
 }
 
+class PresetAnimation {
+  constructor(fps, frameCallbacks) {
+    this.animationController =
+      new AnimationController(fps, this.frame.bind(this));
+    this.frameCount = 0;
+    this.frameCallbacks = frameCallbacks;
+  }
+
+  start() {
+    if (this.frameCount >= this.frameCallbacks.length) return;
+    this.animationController.start();
+  }
+
+  stop() {
+    this.animationController.stop();
+  }
+
+  reset() {
+    this.frameCount = 0;
+  }
+
+  restart() {
+    this.reset();
+    this.start();
+  }
+
+  frame() {
+    if (this.frameCount >= this.frameCallbacks.length) {
+      this.stop();
+      return;
+    }
+    this.frameCallbacks[this.frameCount]();
+    ++this.frameCount;
+  }
+}
+
 export {
   AnimationController,
+  PresetAnimation,
 }

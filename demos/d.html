@@ -54,6 +54,7 @@
     <tile-palette-pick hidden></tile-palette-pick>
   </demo-holder>
   <button id="1">play</button>
+  <button id="9">fade in</button>
   <button id="2">explode</button>
   <button id="3">unexplode</button>
   <button id="4">move</button>
@@ -63,16 +64,20 @@
   <button id="8">palette</button>
   <script>
     const b = [];
-    for (let i = 1; i <= 8; ++i) {
+    for (let i = 1; i <= 9; ++i) {
       b[i] = document.getElementById(i);
     }
     const vid = document.querySelector('two-bit-video-tiles');
     b[1].addEventListener('click', () => vid.play());
+    b[9].addEventListener('click', () => vid.fadeIn());
     b[2].addEventListener('click', () => vid.explode());
     b[3].addEventListener('click', () => vid.deExplode());
     b[4].addEventListener('click', () => vid.moveTile());
 
     const tile = document.querySelector('tile-palette-pick');
+    tile.addEventListener('palette-change', (ev) => {
+      vid.setColours(ev.detail);
+    });
     b[5].addEventListener('click', () => {
       tile.removeAttribute('hidden');
       tile.className = 'tile-grow';

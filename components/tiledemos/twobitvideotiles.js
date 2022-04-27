@@ -2,6 +2,8 @@ import { TwoBitDrawing } from "../twobitdrawing.js";
 import { frameData } from "../../modules/out_data2.js";
 import { base64ToUint8Array } from '../../modules/data_conversion.js';
 import { TileSet } from "../../modules/tile_collections.js";
+import { PresetAnimation } from "../../modules/animation_controller.js";
+import { expandPalette, kGreenColours } from "../../modules/colours.js";
 const TEMPLATE = document.createElement('template');
 TEMPLATE.innerHTML = `
 <style>
@@ -135,15 +137,16 @@ export class TwoBitVideoTiles extends HTMLElement {
     pauseButton.addEventListener('click', () => {
       this.pause();
     });
-    
+
     this.shadowRoot.getElementById('explode-button')
-      .addEventListener('click',(ev) => {
+      .addEventListener('click', (ev) => {
         if (this.canvasesContainer.style.getPropertyValue('--gap-val') === '10px') {
           this.deExplode();
         } else {
           this.explode();
         }
       });
+    this.drawings = this.canvasesContainer.querySelectorAll('two-bit-drawing');
   }
 
   play() {
@@ -161,6 +164,19 @@ export class TwoBitVideoTiles extends HTMLElement {
     this.playing = false;
     playButton.hidden = false;
     pauseButton.hidden = true;
+  }
+
+  fadeIn() {
+    const fadePaletes = [
+      [0, 1, 2, 3],
+      [0, 1, 2, 2],
+      [0, 1, 1, 1],
+      [0, 0, 0, 0],
+    ].reverse();
+    const fadeColours = fadePaletes.map((p) => expandPalette(p, kGreenColours));
+    const fadeFrames = fadeColours.map((c) => (() => this.setColours(c)));
+    const animation = new PresetAnimation(2, fadeFrames);
+    animation.start();
   }
 
   explode() {
@@ -187,6 +203,13 @@ export class TwoBitVideoTiles extends HTMLElement {
     this.canvasesContainer.querySelector('two-bit-drawing:nth-child(159)').style.opacity = '0%';
   }
 
+  setColours(colours) {
+    for (const drawing of this.drawings) {
+      drawing.twoBitCanvas.colours = colours;
+      drawing.twoBitCanvas.redrawCanvas();
+    }
+  }
+
 
 
   firstFrame(timestamp) {
@@ -210,7 +233,7 @@ export class TwoBitVideoTiles extends HTMLElement {
       this.startFrame = 0;
       this.startFrameTime = timestamp;
     }
-    
+
     this.lastFrame = frame;
 
     this.tileSet.fromGBTileData(this.frameData[frame]);
