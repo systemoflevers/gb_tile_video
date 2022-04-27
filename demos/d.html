@@ -1,4 +1,5 @@
 <html>
+
 <head>
   <title>demos</title>
   <script src="../components/tiledemos/demoholder.js" type="module"></script>
@@ -8,11 +9,13 @@
     body {
       background-color: gray;
     }
+
     two-bit-video-tiles {
       position: absolute;
       width: 98%;
       height: 96%;
     }
+
     tile-palette-pick {
       position: absolute;
       width: 98%;
@@ -29,6 +32,7 @@
       from {
         transform: scale(0.01);
       }
+
       to {
         transform: scale(1);
       }
@@ -38,22 +42,26 @@
       animation: 1s move-vid;
       animation-fill-mode: forwards;
     }
+
     @keyframes move-vid {
       from {
         transform: translateX(0);
       }
+
       to {
         transform: translateX(-50%);
       }
     }
   </style>
 </head>
+
 <body>
   <demo-holder>
-    <two-bit-video-tiles ></two-bit-video-tiles>
+    <two-bit-video-tiles></two-bit-video-tiles>
     <tile-palette-pick hidden></tile-palette-pick>
   </demo-holder>
-  <button id="1">play</button>
+  <div id="buttons"></div>
+  <!--button id="1">play</button>
   <button id="9">fade in</button>
   <button id="2">explode</button>
   <button id="3">unexplode</button>
@@ -61,40 +69,48 @@
   <button id="5">grow</button>
   <button id="6">tile grid</button>
   <button id="7">colours</button>
-  <button id="8">palette</button>
+  <button id="8">palette</button-->
   <script>
+    function scene(name, fn) {
+      return { name, fn };
+    }
     const b = [];
     for (let i = 1; i <= 9; ++i) {
       b[i] = document.getElementById(i);
     }
     const vid = document.querySelector('two-bit-video-tiles');
-    b[1].addEventListener('click', () => vid.play());
-    b[9].addEventListener('click', () => vid.fadeIn());
-    b[2].addEventListener('click', () => vid.explode());
-    b[3].addEventListener('click', () => vid.deExplode());
-    b[4].addEventListener('click', () => vid.moveTile());
-
     const tile = document.querySelector('tile-palette-pick');
+
+    const scenes = [
+      scene('play', () => vid.play()),
+      scene('fade in', () => vid.fadeIn()),
+      scene('explode', () => vid.explode()),
+      scene('unexplode', () => vid.deExplode()),
+      scene('move', () => vid.moveTile()),
+      scene('grow', () => {
+        tile.removeAttribute('hidden');
+        tile.className = 'tile-grow';
+      }),
+      scene('tile grid', () => tile.showGrid()),
+      scene('colours', () => tile.showColours()),
+      scene('palette', () => {
+        vid.style.zIndex = '-1';
+        tile.showPalette();
+        vid.hideTile();
+      }),
+    ];
+    const buttonContainer = document.getElementById('buttons');
+    for (const s of scenes) {
+      const button = document.createElement('button');
+      button.innerText = s.name;
+      button.addEventListener('click', s.fn);
+      buttonContainer.appendChild(button);
+    }
     tile.addEventListener('palette-change', (ev) => {
       vid.setColours(ev.detail);
-    });
-    b[5].addEventListener('click', () => {
-      tile.removeAttribute('hidden');
-      tile.className = 'tile-grow';
-    });
-    b[6].addEventListener('click', () => tile.showGrid());
-    b[7].addEventListener('click', () => tile.showColours());
-    b[8].addEventListener('click', () => {
-      vid.style.zIndex = '-1';
-      tile.showPalette();
-      vid.hideTile();
-      /*vid.className = "vid-move";
-      vid.addEventListener('animationend', () => {
-        console.log('done moving');
-        vid.replaceWith([]);
-      })*/
     });
 
   </script>
 </body>
+
 </html>
