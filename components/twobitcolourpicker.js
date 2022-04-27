@@ -28,6 +28,10 @@ template.innerHTML = `
 #colour-picker input:checked ~ label>div {
     margin-bottom: var(--select-lift, 30%); 
 }
+#colour-picker input:not(:checked) ~ label>div {
+  margin-top: var(--select-lift, 30%);
+}
+
 #swatch-0 {
     background-color: rgb(224, 248, 208);
 }
@@ -48,7 +52,7 @@ template.innerHTML = `
 <div><input type="radio" name="colour" id="c0" value="0" /><label for="c0"><div id="swatch-0"></div></label></div>
 <div><input type="radio" name="colour" id="c1" value="1" /><label for="c1"><div id="swatch-1"></div></label></div>
 <div><input type="radio" name="colour" id="c2" value="2" /><label for="c2"><div id="swatch-2"></div></label></div>
-<div><input type="radio" name="colour" id="c3" value="3" checked /><label for="c3"><div id="swatch-3"></div></label></div>
+<div><input type="radio" name="colour" id="c3" value="3"  /><label for="c3"><div id="swatch-3"></div></label></div>
 </div>
 `;
 

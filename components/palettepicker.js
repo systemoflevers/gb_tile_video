@@ -5,19 +5,22 @@ TEMPLATE.innerHTML = `
 #container {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
+  align-items: center;
+  justify-items: center;
 }
 div > div {
-  height: 2em;
+  aspect-ratio: 1;
+  width: 100%;
 }
 #h0 {
   grid-column: 2;
 }
 </style>
 <div id="container">
-  <div id="h0"></div>
-  <div id="h1"></div>
-  <div id="h2"></div>
-  <div id="h3"></div>
+  <div id="h0" style="grid-column: 1; grid-row:2"></div>
+  <div id="h1" style="grid-column: 1; grid-row:3"></div>
+  <div id="h2" style="grid-column: 1; grid-row:4"></div>
+  <div id="h3" style="grid-column: 1; grid-row:5"></div>
   ${colourChoice(0)}
   ${colourChoice(1)}
   ${colourChoice(2)}
@@ -28,7 +31,8 @@ div > div {
 function colourInput(colourIndex, choice) {
   let checked = '';
   if (colourIndex === choice) checked = 'checked';
-  return `<input type="radio" name="c${colourIndex}" value="${choice}" ${checked} />`;
+  const style = `grid-column: ${colourIndex + 2}; grid-row: ${choice + 2};`;
+  return `<input type="radio" id="c${colourIndex}v${choice}" name="c${colourIndex}" value="${choice}" style="${style}" ${checked} />`;
 }
 
 function colourChoice(colourIndex) {
@@ -36,7 +40,8 @@ function colourChoice(colourIndex) {
   for (let i = 0; i < 4; ++i) {
     colourInputs.push(colourInput(colourIndex, i));
   }
-  return `<span>colour ${colourIndex}</span>${colourInputs.join('')}`;
+  const style = `grid-column: ${colourIndex + 2}; grid-row: 1;`;
+  return `<span style="${style}">C${colourIndex}</span>${colourInputs.join('')}`;
 }
 
 const kColours = [
@@ -81,6 +86,13 @@ export class PalettePicker extends HTMLElement {
       colours.push(this.colours[this.palette[i]]);
     }
     return colours;
+  }
+
+  setPalette() {
+    const colourChoices = [];
+    for (let i = 0; i < 4; ++i) {
+      colourChoices.push(this.shadowRoot.querySelectorAll(`input[name=c${i}]`));
+    }
   }
 }
 customElements.define('palette-picker', PalettePicker);
