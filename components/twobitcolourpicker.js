@@ -15,7 +15,9 @@ template.innerHTML = `
 #colour-picker label div {
   width: 100%;
     aspect-ratio: 1;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 #colour-picker input {
@@ -47,12 +49,18 @@ template.innerHTML = `
 #swatch-3{
     background-color: rgb(8, 24, 32);
 }
+
+label div span {
+  font-size: 4em;
+  position: absolute;
+}
+
 </style>
 <div id="colour-picker">
-<div><input type="radio" name="colour" id="c0" value="0" /><label for="c0"><div id="swatch-0"></div></label></div>
-<div><input type="radio" name="colour" id="c1" value="1" /><label for="c1"><div id="swatch-1"></div></label></div>
-<div><input type="radio" name="colour" id="c2" value="2" /><label for="c2"><div id="swatch-2"></div></label></div>
-<div><input type="radio" name="colour" id="c3" value="3"  /><label for="c3"><div id="swatch-3"></div></label></div>
+<div><input type="radio" name="colour" id="c0" value="0" /><label for="c0"><div id="swatch-0"><span></span></div></label></div>
+<div><input type="radio" name="colour" id="c1" value="1" /><label for="c1"><div id="swatch-1"><span></span></div></label></div>
+<div><input type="radio" name="colour" id="c2" value="2" /><label for="c2"><div id="swatch-2"><span></span></div></label></div>
+<div><input type="radio" name="colour" id="c3" value="3"  /><label for="c3"><div id="swatch-3"><span></span></div></label></div>
 </div>
 `;
 
@@ -79,6 +87,14 @@ export class TwoBitColourPicker extends HTMLElement {
       const swatch = this.shadowRoot.getElementById(`swatch-${i}`);
       swatch.style.backgroundColor = `rgb(${colours[i].join(', ')})`;
     }
+  }
+
+  showNumbers() {
+    this.shadowRoot.querySelectorAll('label div span').forEach((s, i) => s.innerText = i);
+  }
+
+  hideNumbers() {
+    this.shadowRoot.querySelectorAll('label div span').forEach((s) => s.innerText = '');
   }
 }
 

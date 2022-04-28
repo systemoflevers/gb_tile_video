@@ -81,7 +81,7 @@ two-bit-drawing {
   }
   to {
     /*transform: translateX(calc(110%*20));*/
-    transform: translateX(calc(88%*20)) translateY(536%);
+    transform: translateX(calc(65.7%*20)) translateY(-38%);
     box-shadow: 0px 0px black;
   }
 }
@@ -95,6 +95,7 @@ two-bit-drawing {
   <div id="split-canvases">
   ${makeCanvases()}
   </div>
+  <div id="frames"></div>
 </div>
 
 `
@@ -125,6 +126,8 @@ export class TwoBitVideoTiles extends HTMLElement {
     this.canvases = shadow.querySelectorAll('#split-canvases > two-bit-drawing');
     this.tileSet = new TileSet(20 * 18);
 
+    this.frameCallbacks = new Map();
+    this.frameDisplay = shadow.getElementById('frames');
   }
 
   connectedCallback() {
@@ -147,6 +150,12 @@ export class TwoBitVideoTiles extends HTMLElement {
         }
       });
     this.drawings = this.canvasesContainer.querySelectorAll('two-bit-drawing');
+
+    const readyEvent = new CustomEvent('ready', {
+      bubbles: true,
+      composed: true,
+    });
+    this.dispatchEvent(readyEvent);
   }
 
   play() {
@@ -196,11 +205,12 @@ export class TwoBitVideoTiles extends HTMLElement {
 
   moveTile() {
     //73
-    this.canvasesContainer.querySelector('two-bit-drawing:nth-child(159)').className = 'tileplace';
+    //159
+    this.canvasesContainer.querySelector('two-bit-drawing:nth-child(198)').className = 'tileplace';
   }
 
   hideTile() {
-    this.canvasesContainer.querySelector('two-bit-drawing:nth-child(159)').style.opacity = '0%';
+    this.canvasesContainer.querySelector('two-bit-drawing:nth-child(198)').style.opacity = '0%';
   }
 
   setColours(colours) {
@@ -227,7 +237,7 @@ export class TwoBitVideoTiles extends HTMLElement {
   restOfFrames(timestamp) {
     if (!this.playing) return;
     const timeSinceStart = timestamp - this.startFrameTime;
-    let frame = Math.floor(timeSinceStart * (60 / 1000)) + this.startFrame;
+    let frame = Math.floor(timeSinceStart * (30 / 1000)) + this.startFrame;
     if (frame >= this.frameData.length) {
       frame = 0;
       this.startFrame = 0;
@@ -240,7 +250,10 @@ export class TwoBitVideoTiles extends HTMLElement {
     for (let i = 0; i < 360; ++i) {
       this.canvases[i].setTwoBitData(this.tileSet.tiles[i]);
     }
-
+    if (this.frameCallbacks.has(frame)) {
+      setTimeout(this.frameCallbacks.get(frame));
+    }
+    //this.frameDisplay.replaceChildren(frame);
     requestAnimationFrame(this.restOfFrames.bind(this));
   }
 

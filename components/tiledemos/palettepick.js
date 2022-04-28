@@ -8,6 +8,7 @@ import { PalettePicker } from "../palettepicker.js";
 import { PaletteSlider } from "../paletteslider.js";
 import { PaletteToggle } from "../palettetoggle.js";
 import { BigPaletteAnimation } from "../bigpaletteanimation.js";
+import { PresetAnimation } from "../../modules/animation_controller.js";
 
 const TEMPLATE = document.createElement('template');
 TEMPLATE.innerHTML = `
@@ -93,7 +94,7 @@ TEMPLATE.innerHTML = `
     <two-bit-drawing id="drawing" colour-picker-id="colour-picker" width="8" height="8"></two-bit-drawing>
     <show-grid hidden ></show-grid>
   </div>
-  <div id="colour-control">
+  <div id="colour-control" hidden">
     <div id="colour-blocker"></div>
     <div id="cpicker-container">
       <two-bit-colour-picker  id="colour-picker" style="opacity: 0;"></two-bit-colour-picker>
@@ -104,6 +105,9 @@ TEMPLATE.innerHTML = `
   </div>
 </div>
 `;
+
+const k4ColourTile = new Uint8Array([0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 2, 2, 2, 2, 3, 3, 3, 3, 2, 2, 2, 2, 3, 3, 3, 3, 2, 2, 2, 2, 3, 3, 3, 3]);
+const kPlayerCharacter = new Uint8Array([0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 2, 2, 2, 2, 2, 0, 0, 2, 0, 2, 2, 2, 0, 2, 0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 3, 3, 0, 3, 3, 0, 0,]);
 
 class TileFadeDemo extends HTMLElement {
   constructor() {
@@ -142,14 +146,48 @@ class TileFadeDemo extends HTMLElement {
     this.drawing.setAttribute('show-pixel-grid', '');
   }
 
+  showColourNumbers() {
+    this.shadowRoot.getElementById('colour-control').hidden = false;
+    this.shadowRoot.querySelector('two-bit-colour-picker').style.opacity = '100%';
+    this.shadowRoot.querySelector('two-bit-colour-picker').showNumbers();
+  }
+  
   showColours() {
     this.shadowRoot.querySelector('two-bit-colour-picker').style.opacity = '100%';
-    this.shadowRoot.getElementById('colour-blocker').className = 'move';
+    const colourBlocker = this.shadowRoot.getElementById('colour-blocker');
+    colourBlocker.className = 'move';
+    const animationEnd = () => {
+      const palette = this.shadowRoot.querySelector('palette-picker');
+      new PresetAnimation(5, [
+        () => palette.setPalette([0, 1, 0, 0]),
+        () => palette.setPalette([0, 1, 2, 0]),
+        () => palette.setPalette([0, 1, 2, 3]),
+      ]).start();
+      colourBlocker.removeEventListener('animationend', animationEnd);
+    };
+    colourBlocker.addEventListener(
+      'animationend', animationEnd
+    );
+  }
+
+  hideColourNumbers() {
+    this.shadowRoot.querySelector('two-bit-colour-picker').hideNumbers();
   }
 
   showPalette() {
     this.shadowRoot.getElementById('palette-controls').style.opacity = '100%';
     this.shadowRoot.getElementById('colour-blocker').className = 'away';
+  }
+
+  setPalette(p) {
+    this.shadowRoot.querySelector('palette-picker').setPalette(p);
+  }
+
+  draw4Colours() {
+    this.drawing.twoBitCanvas.setTwoBitData(k4ColourTile);
+  }
+  setTile(tbpp) {
+    this.drawing.twoBitCanvas.setTwoBitData(tbpp);
   }
 }
 

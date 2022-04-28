@@ -70,9 +70,9 @@
   <button id="6">tile grid</button>
   <button id="7">colours</button>
   <button id="8">palette</button-->
-  <script>
-    function scene(name, fn) {
-      return { name, fn };
+  <script defer>
+    function scene(name, fn, f = null) {
+      return { name, fn, f};
     }
     const b = [];
     for (let i = 1; i <= 9; ++i) {
@@ -81,24 +81,41 @@
     const vid = document.querySelector('two-bit-video-tiles');
     const tile = document.querySelector('tile-palette-pick');
 
-    const scenes = [
-      scene('play', () => vid.play()),
-      scene('fade in', () => vid.fadeIn()),
-      scene('explode', () => vid.explode()),
-      scene('unexplode', () => vid.deExplode()),
-      scene('move', () => vid.moveTile()),
+    const timed_scenes = [
+      scene('fade in', () => vid.fadeIn(), 150/2),
+      scene('explode', () => vid.explode(), 540/2),
+      scene('unexplode', () => vid.deExplode(), 630/2),
+      scene('move', () => vid.moveTile(), 720/2),
       scene('grow', () => {
         tile.removeAttribute('hidden');
         tile.className = 'tile-grow';
-      }),
-      scene('tile grid', () => tile.showGrid()),
-      scene('colours', () => tile.showColours()),
+      }, 800/2),
+      scene('tile grid', () => tile.showGrid(), 820/2),
+      scene('colour numbers', () => tile.showColourNumbers(), 1800/2),
+      scene('colours', () => {
+        tile.setPalette([0, 0, 0, 0]);
+        tile.draw4Colours();
+        tile.showColours();
+      }, 2080/2),
+      scene('hide colour Numbers', () => tile.hideColourNumbers(), 2200/2),
       scene('palette', () => {
         vid.style.zIndex = '-1';
         tile.showPalette();
         vid.hideTile();
       }),
     ];
+
+    const scenes = [
+      scene('play', () => vid.play()),
+      ...timed_scenes
+    ];
+    vid.addEventListener('ready', () => {
+      //vid.frameCallbacks.set(60, scenes[1].fn);
+      for (const s of timed_scenes) {
+        if (!s.f) continue;
+        vid.frameCallbacks.set(s.f, s.fn);
+      }
+    });
     const buttonContainer = document.getElementById('buttons');
     for (const s of scenes) {
       const button = document.createElement('button');
