@@ -249,6 +249,12 @@ class TileSet {
       this.tiles[i] = gbTileToByteTile(gbTile, byteTile);
     }
   }
+
+  setTile(i, tileBytes) {
+    for (let p = 0; p < 64; ++p) {
+      this.tiles[i][p] = tileBytes[p];
+    }
+  }
 }
 
 export {

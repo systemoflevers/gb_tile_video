@@ -4,6 +4,7 @@ class AnimationController {
     this.callback = callback;
     this.requestId = null;
     this.startTime = null;
+    this.lastFrameTime = null;
     this.frameCount = 0;
     this.boundFrame = this.frame.bind(this);
   }
@@ -25,16 +26,24 @@ class AnimationController {
     this.requestId = requestAnimationFrame(this.boundFrame);
     if (!this.startTime) {
       this.startTime = timestamp;
+      this.lastFrameTime = timestamp;
       this.frameCount++;
       this.callback();
       return;
     }
-    const tSinceStart = timestamp - this.startTime;
-    const framesSinceStart = Math.floor(tSinceStart / this.frameLength);
-    if (framesSinceStart <= this.frameCount) return;
-
-    this.frameCount = framesSinceStart;
+    if (timestamp - this.lastFrameTime < this.frameLength) return;
+    //console.log(timestamp - this.lastFrameTime);
+    this.lastFrameTime = timestamp;
     this.callback();
+    return;
+    // this logic should average out to the desired fps but it doesn't look
+    // good for short animations.
+    // const tSinceStart = timestamp - this.startTime;
+    // const framesSinceStart = Math.floor(tSinceStart / this.frameLength);
+    // if (framesSinceStart <= this.frameCount) return;
+    //
+    // this.frameCount = framesSinceStart;
+    // this.callback();
   }
 }
 
@@ -44,15 +53,20 @@ class PresetAnimation {
       new AnimationController(fps, this.frame.bind(this));
     this.frameCount = 0;
     this.frameCallbacks = frameCallbacks;
+    this.promiseResolver = null;
   }
 
   start() {
     if (this.frameCount >= this.frameCallbacks.length) return;
+    if (this.promiseResolver) this.stop();
     this.animationController.start();
+    return new Promise((resolve, reject) => this.promiseResolver = resolve);
   }
 
   stop() {
     this.animationController.stop();
+    if (this.promiseResolver) this.promiseResolver();
+    this.promiseResolver = null;
   }
 
   reset() {
@@ -61,7 +75,7 @@ class PresetAnimation {
 
   restart() {
     this.reset();
-    this.start();
+    return this.start();
   }
 
   frame() {

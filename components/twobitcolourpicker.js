@@ -18,6 +18,11 @@ template.innerHTML = `
     display: inline-flex;
     align-items: center;
     justify-content: center;
+  transition: margin 0.5s;
+}
+#colour-picker label div span {
+  mix-blend-mode: difference;
+  color: white;
 }
 
 #colour-picker input {
@@ -95,6 +100,20 @@ export class TwoBitColourPicker extends HTMLElement {
 
   hideNumbers() {
     this.shadowRoot.querySelectorAll('label div span').forEach((s) => s.innerText = '');
+  }
+
+  pickColour(c) {
+    this.shadowRoot.getElementById(`c${c}`).click();
+  }
+
+  /**
+   * This just unchecks the input, it won't fire an event.
+   */
+  unsetColour() {
+    const inputs = this.shadowRoot.querySelectorAll('input');
+    for(const input of inputs) {
+      input.checked = false;
+    }
   }
 }
 

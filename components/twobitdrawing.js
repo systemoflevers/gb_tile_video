@@ -122,7 +122,6 @@ class TwoBitDrawing extends HTMLElement {
       this.drawGrid();
       return;
     }
-    console.log('change', name, oldValue, newValue, this[name]);
     this.updateDimensions();
   }
 
@@ -130,7 +129,6 @@ class TwoBitDrawing extends HTMLElement {
     return parseInt(this.getAttribute('height')) || 0;
   }
   set height(value) {
-    console.log('height setter');
     this.setAttribute('height', value);
   }
 
@@ -193,9 +191,9 @@ class TwoBitDrawing extends HTMLElement {
     this.twoBitCanvas.width = this.width;
     this.twoBitCanvas.height = this.height
 
-    //this.tileMap = CopyOnWriteMap.makeSimpleMap(this.width / 8, this.height / 8);
+    this.tileMap = CopyOnWriteMap.makeSimpleMap(this.width / 8, this.height / 8);
     //this.tileMap = TileMap.makeSimpleMap(this.width / 8, this.height / 8);
-    this.tileMap = TileMap.makeFullMap(this.width / 8, this.height / 8);
+    //this.tileMap = TileMap.makeFullMap(this.width / 8, this.height / 8);
   }
 
   drawGrid() {
@@ -299,7 +297,6 @@ class TwoBitDrawing extends HTMLElement {
       if (y < 0 || y >= this.height) return;
       const tileIndex = this.tileMap.toMapIndex(x, y);
       if (this.tileMap.tileMap[tileIndex] === this.selectedTile) return;
-      console.log(x, y);
       this.needRedraw = true;
       // This is a lie, but it makes sure that a redraw event is fired.
       this.changedTiles.add(this.selectedTile);

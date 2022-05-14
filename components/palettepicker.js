@@ -41,7 +41,7 @@ function colourChoice(colourIndex) {
     colourInputs.push(colourInput(colourIndex, i));
   }
   const style = `grid-column: ${colourIndex + 2}; grid-row: 1;`;
-  return `<span style="${style}">C${colourIndex}</span>${colourInputs.join('')}`;
+  return `<span style="${style}">${colourIndex}</span>${colourInputs.join('')}`;
 }
 
 const kColours = [

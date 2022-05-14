@@ -56,13 +56,13 @@ export class TwoBitCanvas extends HTMLElement {
     }
 
     connectedCallback() {
-        console.log('connected', this.getAttribute('width'), this.height);
+        //console.log('connected', this.getAttribute('width'), this.height);
     }
 
     static get observedAttributes() { return ['width', 'height']; }
     attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue === newValue) return;
-        console.log('change', name, oldValue, newValue, this[name]);
+        //console.log('change', name, oldValue, newValue, this[name]);
         this.updateDimensions();
     }
 
@@ -70,7 +70,7 @@ export class TwoBitCanvas extends HTMLElement {
         return parseInt(this.getAttribute('height')) || 0;
     }
     set height(value) {
-        console.log('height setter');
+        //console.log('height setter');
         this.setAttribute('height', value);
     }
 

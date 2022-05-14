@@ -1,7 +1,7 @@
 import { TwoBitDrawing } from "../twobitdrawing.js";
 import { frameData } from "../../modules/out_data2.js";
 import { base64ToUint8Array } from '../../modules/data_conversion.js';
-import { TileSet } from "../../modules/tile_collections.js";
+import { TileMap, TileSet } from "../../modules/tile_collections.js";
 import { PresetAnimation } from "../../modules/animation_controller.js";
 import { expandPalette, kGreenColours } from "../../modules/colours.js";
 const TEMPLATE = document.createElement('template');
@@ -10,18 +10,34 @@ TEMPLATE.innerHTML = `
 #container {
   display: flex;
   height: 100%;
+  align-items: center;
+  justify-content: center;
 }
-two-bit-drawing {
+#canvas-container {
+  height: 100%;
+  aspect-ratio: 160 / 144;
+  transition: height 1s, width 1s, transform 1s;
+}
+#frames {
+  position: absolute;
+  bottom: 0;
+}
+#split-canvases > two-bit-drawing {
   margin: -1px;
+}
+#single-canvas {
+  height: 100%;
+  aspect-ratio: 160 / 144;
 }
 #split-canvases {
   --gap-val: 0px;
   /*width: calc(30% + (19 * var(--gap-val)));*/
-  gap: var(--gap-val);
+  //gap: var(--gap-val);
+  gap: inherit;
   display: grid;
   grid-template-columns: repeat(20, 1fr);
-  transition: gap 1s, width 1s, height 1s;
-  margin: auto;
+  //transition: gap 1s, width 1s, height 1s;
+  //margin: auto;
   aspect-ratio: 160 / 144;
   height: 100%;
   background-color: grey;
@@ -30,9 +46,13 @@ two-bit-drawing {
   animation: 0.5s explode-grid;
   animation-fill-mode: forwards;
 }
-#split-canvases.smalled {
+/*#split-canvases.smalled {*/
+#canvas-container.smalled {
   animation: 1s unexplode-small;
   animation-fill-mode: forwards;
+}
+#canvas-container.bigged {
+  animation: 1s make-bigged forwards;
 }
 
 @keyframes explode-grid {
@@ -40,7 +60,7 @@ two-bit-drawing {
     gap: 0
   }
   to {
-    gap: 10px;
+    gap: 20px;
   }
 }
 
@@ -54,6 +74,17 @@ two-bit-drawing {
     height: 50%;
     gap: 0px;
     transform: translateX(-110%);
+  }
+}
+
+@keyframes make-bigged {
+  from {
+    height: 50%;
+    transform: translateX(-110%);
+  }
+  to {
+    height: 100%;
+    transform: translateX(0);
   }
 }
 /*.smalled > two-bit-drawing:not(:nth-child(73)) {
@@ -81,7 +112,7 @@ two-bit-drawing {
   }
   to {
     /*transform: translateX(calc(110%*20));*/
-    transform: translateX(calc(65.7%*20)) translateY(-38%);
+    transform: translateX(calc(76.4%*20)) translateY(-318%);
     box-shadow: 0px 0px black;
   }
 }
@@ -92,8 +123,13 @@ two-bit-drawing {
     <button id="pause-button" hidden>pause</button>
     <button id="explode-button">explode</button>
   </span>
+  <div id="canvas-container">
+  <div id="single-canvas" hidden>
+    <two-bit-drawing id="single-drawing" width="160" height="144"></two-bit-drawing>
+  </div>
   <div id="split-canvases">
   ${makeCanvases()}
+  </div>
   </div>
   <div id="frames"></div>
 </div>
@@ -107,13 +143,19 @@ function makeCanvases() {
   }
   return canvases.join('\n');
 }
+
+const kUseSplit = 0;
+const kUseSingle = 1;
+
+const kMoveTile = 256;
+
 export class TwoBitVideoTiles extends HTMLElement {
   constructor() {
     super();
 
     const shadow = this.attachShadow({ mode: 'open' });
     shadow.appendChild(TEMPLATE.content.cloneNode(true));
-    this.drawing = shadow.querySelector('two-bit-drawing');
+    this.singleDrawing = shadow.getElementById('single-drawing');
     this.frameData = [];
     for (const frame of frameData) {
       this.frameData.push(base64ToUint8Array(frame));
@@ -121,13 +163,18 @@ export class TwoBitVideoTiles extends HTMLElement {
     this.startFrameTime = 0;
     this.startFrame = 0;
     this.lastFrame = 0;
+    this.endingFrame = null;
     this.playing = false;
-    this.canvasesContainer = shadow.getElementById('split-canvases');
+    this.loop = true;
+    this.canvasesContainer = shadow.getElementById('canvas-container');
+    this.splitCanvasContainer = shadow.getElementById('split-canvases');
     this.canvases = shadow.querySelectorAll('#split-canvases > two-bit-drawing');
     this.tileSet = new TileSet(20 * 18);
 
     this.frameCallbacks = new Map();
     this.frameDisplay = shadow.getElementById('frames');
+    this.events = [];
+    this.whichCanvas = kUseSplit;
   }
 
   connectedCallback() {
@@ -149,8 +196,12 @@ export class TwoBitVideoTiles extends HTMLElement {
           this.explode();
         }
       });
-    this.drawings = this.canvasesContainer.querySelectorAll('two-bit-drawing');
+    this.drawings = this.canvasesContainer.querySelectorAll('#split-canvases > two-bit-drawing');
 
+    this.singleDrawing.tileMap = new TileMap(20, 18, this.tileSet);
+    for (let i = 0; i < 360; ++i) {
+      this.singleDrawing.tileMap.setTile(i, i);
+    }
     const readyEvent = new CustomEvent('ready', {
       bubbles: true,
       composed: true,
@@ -158,10 +209,30 @@ export class TwoBitVideoTiles extends HTMLElement {
     this.dispatchEvent(readyEvent);
   }
 
-  play() {
+  addEvent(frame, eventCallback) {
+    this.events.push({f: frame, c: eventCallback});
+    this.events.sort((a, b) => a.f - b.f);
+  }
+
+  useSingle() {
+    this.shadowRoot.getElementById('single-canvas').hidden = false;
+    this.shadowRoot.getElementById('split-canvases').style.display = 'none';
+    this.whichCanvas = kUseSingle;
+  }
+  useSplit() {
+    this.shadowRoot.getElementById('single-canvas').hidden = true;
+    this.shadowRoot.getElementById('split-canvases').style.display = '';
+    this.whichCanvas = kUseSplit;
+  }
+
+  play(startFrame = null, endingFrame = null) {
+    this.endingFrame = endingFrame ?? this.frameData.length - 1;
+    if (startFrame)
+      this.lastFrame = startFrame;
     const playButton = this.shadowRoot.getElementById('play-button');
     const pauseButton = this.shadowRoot.getElementById('pause-button');
     this.playing = true;
+    //requestAnimationFrame(this.firstFrame.bind(this));
     requestAnimationFrame(this.resumeFrames.bind(this));
     playButton.hidden = true;
     pauseButton.hidden = false;
@@ -203,17 +274,23 @@ export class TwoBitVideoTiles extends HTMLElement {
     this.canvasesContainer.className = 'smalled';
   }
 
+  fullSize() {
+    this.canvasesContainer.className = '';
+  }
+
   moveTile() {
     //73
     //159
-    this.canvasesContainer.querySelector('two-bit-drawing:nth-child(198)').className = 'tileplace';
+    //198
+    this.canvasesContainer.querySelector(`two-bit-drawing:nth-child(${kMoveTile})`).className = 'tileplace';
   }
 
   hideTile() {
-    this.canvasesContainer.querySelector('two-bit-drawing:nth-child(198)').style.opacity = '0%';
+    this.canvasesContainer.querySelector(`two-bit-drawing:nth-child(${kMoveTile})`).style.opacity = '0%';
   }
 
   setColours(colours) {
+    this.singleDrawing.twoBitCanvas.colours = colours;
     for (const drawing of this.drawings) {
       drawing.twoBitCanvas.colours = colours;
       drawing.twoBitCanvas.redrawCanvas();
@@ -233,12 +310,26 @@ export class TwoBitVideoTiles extends HTMLElement {
     this.startFrame = this.lastFrame;
     this.restOfFrames(timestamp);
   }
+  doEventsUpTo(frame) {
+    while (this.events[0]?.f <= frame) {
+      setTimeout(this.events.shift().c);
+    }
+  }
+
+  sync(frame) {
+    this.startFrame = frame;
+    this.startFrameTime = performance.now();
+  }
 
   restOfFrames(timestamp) {
     if (!this.playing) return;
     const timeSinceStart = timestamp - this.startFrameTime;
     let frame = Math.floor(timeSinceStart * (30 / 1000)) + this.startFrame;
-    if (frame >= this.frameData.length) {
+    if (frame > this.endingFrame) {
+      if (!this.loop) {
+        this.playing = false;
+        return;
+      }
       frame = 0;
       this.startFrame = 0;
       this.startFrameTime = timestamp;
@@ -247,14 +338,33 @@ export class TwoBitVideoTiles extends HTMLElement {
     this.lastFrame = frame;
 
     this.tileSet.fromGBTileData(this.frameData[frame]);
-    for (let i = 0; i < 360; ++i) {
-      this.canvases[i].setTwoBitData(this.tileSet.tiles[i]);
-    }
-    if (this.frameCallbacks.has(frame)) {
-      setTimeout(this.frameCallbacks.get(frame));
+    this.drawFrame();
+    while (this.events[0]?.f <= frame) {
+      setTimeout(this.events.shift().c);
     }
     //this.frameDisplay.replaceChildren(frame);
     requestAnimationFrame(this.restOfFrames.bind(this));
+  }
+
+  drawFrame() {
+    switch (this.whichCanvas) {
+      case (kUseSplit):
+        for (let i = 0; i < 360; ++i) {
+          this.canvases[i].setTwoBitData(this.tileSet.tiles[i]);
+        }
+        break;
+
+      case (kUseSingle):
+        this.singleDrawing.needRedraw = true;
+        break;
+    }
+    if (this.oneTileFrameCallback) {
+      this.oneTileFrameCallback(this.tileSet.tiles[kMoveTile - 1])
+    }
+  }
+
+  justBig() {
+    this.canvasesContainer.className = 'bigged';
   }
 
   doAnimate() {
