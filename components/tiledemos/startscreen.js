@@ -72,7 +72,8 @@ export class StartScreen extends HTMLElement {
     this.shadow.appendChild(TEMPLATE.content.cloneNode(true));
 
     this.drawing = this.shadowRoot.getElementById('static-drawing');
-    this.themeMusic = [new Audio('theme.mp3'), new Audio('theme.mp3')];
+    this.themeMusic = new Audio('theme.mp3');
+    this.themeMusic.loop = true;
     this.intervalId = null;
 
     this.selectSound = new Audio('select_sound.mp3');
@@ -105,24 +106,15 @@ export class StartScreen extends HTMLElement {
     offScreen.className = 'invis';
     
     this.drawing.fromB64JSONGBData(kWithArrow);//kStartScreen);
-    let i = 1;
-    this.themeMusic[0].currentTime = 0;
-    this.themeMusic[0].play();
-    this.intervalId = setInterval(() => {
-      this.themeMusic[i].play();
-      i = (i + 1) % 2;
-      this.themeMusic[i].pause();
-      this.themeMusic[i].currentTime = 0;
-    }, this.themeMusic[0].duration * (1000 + this.delay));
+    this.themeMusic.currentTime = 0;
+    this.themeMusic.play();
     const selectionPromise =
       new Promise((res, rej) => this.selectionResolver = res);
     return selectionPromise;
   }
 
   stopMusic() {
-    this.themeMusic[0].pause();
-    this.themeMusic[1].pause();
-    clearInterval(this.intervalId);
+    this.themeMusic.pause();
   }
 
   blankSelected() {

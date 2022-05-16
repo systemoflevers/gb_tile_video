@@ -1,5 +1,5 @@
 import { TwoBitDrawing } from "../twobitdrawing.js";
-import { frameData } from "../../modules/out_data2.js";
+//import { frameData } from "../../modules/out_data2.js";
 import { base64ToUint8Array } from '../../modules/data_conversion.js';
 import { TileMap, TileSet } from "../../modules/tile_collections.js";
 import { PresetAnimation } from "../../modules/animation_controller.js";
@@ -157,9 +157,7 @@ export class TwoBitVideoTiles extends HTMLElement {
     shadow.appendChild(TEMPLATE.content.cloneNode(true));
     this.singleDrawing = shadow.getElementById('single-drawing');
     this.frameData = [];
-    for (const frame of frameData) {
-      this.frameData.push(base64ToUint8Array(frame));
-    }
+    this.frameDataPromise = this.fetchFrameData();
     this.startFrameTime = 0;
     this.startFrame = 0;
     this.lastFrame = 0;
@@ -175,6 +173,47 @@ export class TwoBitVideoTiles extends HTMLElement {
     this.frameDisplay = shadow.getElementById('frames');
     this.events = [];
     this.whichCanvas = kUseSplit;
+  }
+
+  async updateLoading(resolver, reader, length) {
+    let receivedLength = 0;
+    const chunks = [];
+    while (true) {
+      const {done, value} = await reader.read();
+      if (value) {
+        chunks.push(value);
+        receivedLength += value.length;
+        if (this.loadingCallback) this.loadingCallback(receivedLength, length);
+      }
+      if (done) break;
+    }
+    const allChunks = new Uint8Array(receivedLength);let position = 0;
+    for(let chunk of chunks) {
+      allChunks.set(chunk, position);
+      position += chunk.length;
+    }
+    //const result = new TextDecoder("utf-8").decode(allChunks);
+
+    //resolver(JSON.parse(result));
+    const frames = [];
+    for (let i = 0; i < receivedLength; i += 360 * 64) {
+      frames.push(allChunks.subarray(i, i + (360 * 64)));
+    }
+    resolver(frames);
+  }
+
+  async fetchFrameData() {
+    //const response = await fetch('../demos/frame_data.json');
+    const response = await fetch('../demos/raw_frame_data');
+    this.response = response;
+    const b64FrameData = await new Promise(resolve => {
+      this.updateLoading(resolve, response.body.getReader(), response.headers.get('content-length'));
+    });
+    /*const b64FrameData = await response.json();*/
+    for (const frame of b64FrameData) {
+      //this.frameData.push(base64ToUint8Array(frame));
+      this.frameData.push(frame);
+    }
   }
 
   connectedCallback() {
@@ -206,7 +245,7 @@ export class TwoBitVideoTiles extends HTMLElement {
       bubbles: true,
       composed: true,
     });
-    this.dispatchEvent(readyEvent);
+    this.frameDataPromise.then(() => this.dispatchEvent(readyEvent));
   }
 
   addEvent(frame, eventCallback) {

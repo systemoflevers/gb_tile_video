@@ -2,6 +2,9 @@ import { paletteChangeEvent } from "../modules/colours.js";
 const TEMPLATE = document.createElement('template');
 TEMPLATE.innerHTML = `
 <style>
+:host {
+  display: block;
+}
 #container {
   display: grid;
   grid-template-columns: repeat(5, 1fr);

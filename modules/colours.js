@@ -1,4 +1,14 @@
 
+const kColourChangeEventType = 'colour-change';
+function colourChangeEvent(colourID) {
+  return new CustomEvent(kColourChangeEventType,
+    {
+      bubbles: true,
+      composed: true,
+      detail: colourID,
+    });
+}
+
 const kPaletteChangeEventType = 'palette-change';
 function paletteChangeEvent(colours) {
   return new CustomEvent(kPaletteChangeEventType,
@@ -26,6 +36,8 @@ const kGreenColours = [
 ];
 
 export {
+  kColourChangeEventType,
+  colourChangeEvent,
   kPaletteChangeEventType,
   paletteChangeEvent,
   expandPalette,

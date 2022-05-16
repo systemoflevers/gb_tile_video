@@ -14,6 +14,7 @@ export class ShowGrid extends HTMLElement {
     this.drawing = null;
     this.pixelGrid = true;
     this.tileGrid = false;
+    this.checkbox = shadow.getElementById('show-grid');
   }
 
   connectedCallback() {
@@ -37,6 +38,33 @@ export class ShowGrid extends HTMLElement {
       }
       console.log(showGridCheckbox.checked);
     });
+  }
+
+  sendState(show) {
+    if (!this.drawing) return;
+    if (show) {
+      if (this.pixelGrid) {
+      this.drawing.setAttribute('show-pixel-grid', '');
+      }
+      if (this.tileGrid) {
+        this.drawing.setAttribute('show-tile-grid', '');
+      }
+    } else {
+      if (this.pixelGrid) {
+      this.drawing.removeAttribute('show-pixel-grid');
+      }
+      if (this.tileGrid) {
+        this.drawing.removeAttribute('show-tile-grid');
+      }
+    }
+  }
+
+  static get observedAttributes() { return ['tile', 'pixel']; }
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue === newValue) return;
+    this.pixelGrid = this.hasAttribute('pixel');
+    this.tileGrid = this.hasAttribute('tile');
+    this.sendState(this.checkbox.checked);
   }
 }
 

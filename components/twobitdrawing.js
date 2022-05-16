@@ -210,6 +210,10 @@ class TwoBitDrawing extends HTMLElement {
   setColour(colourID) {
     this.colour = colourID;
   }
+  setPalette(colours) {
+    this.twoBitCanvas.colours = colours;
+    this.twoBitCanvas.redrawCanvas();
+  }
 
   setPixel(x, y, v) {
     if (x >= this.width || x < 0 || y >= this.height || y < 0) {

@@ -91,10 +91,38 @@
         transform: translateX(-50%);
       }
     }
+    #loading {
+      background-color: rgb(255, 255, 255, 0.8);
+      position: absolute;
+      left: 0;
+      width: 100%;
+      top: 0;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      font-size: 3em;
+    }
+    #loading[hidden] {
+      display: none;
+    }
+    #loading div {
+      /*animation: 2s alternate infinite loading-blink;*/
+    }
+    @keyframes loading-blink {
+      from {
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+      }
+    }
   </style>
 </head>
 
 <body>
+  <div id="loading"><div>loading <span id='loading-percent'>0</span>%</div></div>
   <demo-holder>
     <startup-screen ></startup-screen>
     <start-screen hidden></start-screen>
@@ -160,7 +188,9 @@
       }
       playing = !playing;
     });
-    const startFrame = Math.floor(Math.floor(800/30) * 30);
+    const loadingPercentContainer = document.getElementById('loading-percent');
+    vid.loadingCallback = (received, total) =>loadingPercentContainer.replaceChildren(Math.floor(100 * received / total));
+    const startFrame = Math.floor(Math.floor(0/30) * 30);
     const scenes = [
       scene('start', async () => {
         await startup.start();
@@ -513,6 +543,7 @@
     [91, ["off", 12432]],
     ];
     vid.addEventListener('ready', () => {
+      document.getElementById('loading').hidden = true;
       for (const e of events) {
         const scene = scenes[e[0]];
         vid.addEvent(e[1][1], () => {

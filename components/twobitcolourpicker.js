@@ -1,3 +1,4 @@
+import { colourChangeEvent } from "../modules/colours.js";
 
 const template = document.createElement('template');
 template.innerHTML = `
@@ -83,8 +84,8 @@ export class TwoBitColourPicker extends HTMLElement {
 
   colourChangeHandler(ev) {
     const colourID = parseInt(ev.target.value);
-    const colourChangeEvent = new CustomEvent('colour-change', {detail: colourID});
-    this.dispatchEvent(colourChangeEvent);
+    const event = colourChangeEvent(colourID);
+    this.dispatchEvent(event);
   }
 
   setPalette(colours) {

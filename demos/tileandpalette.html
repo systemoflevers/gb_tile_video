@@ -1,0 +1,35 @@
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tile and Palette</title>
+  <script src="../components/tiledemos/tileandpalette.js" type="module"></script>
+  <style>
+    #container {
+      display: flex;
+      height: 100%;
+      justify-content: center;
+    }
+    tile-and-palette {
+      max-height: 100%;
+      max-width: 90%;
+    }
+    @media (orientation: landscape) {
+      tile-and-palette {
+        --picker-flow-direction: column;
+        aspect-ratio: 2;
+      }
+    }
+    @media (orientation: portrait) {
+      tile-and-palette {
+        --picker-flow-direction: row;
+        aspect-ratio: 1 / 2;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <tile-and-palette></tile-and-palette>
+  </div>
+</body>
+</html>
