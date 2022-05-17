@@ -195,9 +195,10 @@ export class TwoBitVideoTiles extends HTMLElement {
     //const result = new TextDecoder("utf-8").decode(allChunks);
 
     //resolver(JSON.parse(result));
+    //return;
     const frames = [];
-    for (let i = 0; i < receivedLength; i += 360 * 64) {
-      frames.push(allChunks.subarray(i, i + (360 * 64)));
+    for (let i = 0; i < receivedLength; i += 360 * 16) {
+      frames.push(allChunks.subarray(i, i + (360 * 16)));
     }
     resolver(frames);
   }
@@ -209,7 +210,7 @@ export class TwoBitVideoTiles extends HTMLElement {
     const b64FrameData = await new Promise(resolve => {
       this.updateLoading(resolve, response.body.getReader(), response.headers.get('content-length'));
     });
-    /*const b64FrameData = await response.json();*/
+    //const b64FrameData = await response.json();
     for (const frame of b64FrameData) {
       //this.frameData.push(base64ToUint8Array(frame));
       this.frameData.push(frame);
@@ -356,8 +357,8 @@ export class TwoBitVideoTiles extends HTMLElement {
   }
 
   sync(frame) {
-    this.startFrame = frame;
-    this.startFrameTime = performance.now();
+    /*this.startFrame = frame;
+    this.startFrameTime = performance.now();*/
   }
 
   restOfFrames(timestamp) {

@@ -1,9 +1,19 @@
+"""Process a video file and outputs GameBoy tile data.
+
+The input file is defined by input_file. The output files will be:
+out_data2.js a javascript file with an array of base64 encoded frames.
+frame_data.json a json file with an array of base64 encoded frames.
+raw_frame_data a binary file with raw frame data. Every 360 * 16 bytes is one
+  frame.
+"""
+
 import itertools
+# Usese https://github.com/kkroening/ffmpeg-python
 import ffmpeg
 import base64
 
-
 input_file = 'maybe_real06_01.mp4'
+#input_file = 'VID_20220512_211226.mp4'
 
 palette_file = 'gb_palette_green.png'
 out_name = 'test_20'
@@ -111,6 +121,8 @@ while True:
         print(len(encoded_frames))
 
 print(len(encoded_frames))
+print(len(raw_frames))
+print(len(raw_frames[0]), len(raw_frames[100]))
 
 all_frames = '","'.join((frame.decode('utf-8') for frame in encoded_frames))
 #print(all_frames)
@@ -119,6 +131,11 @@ print(len(all_frames))
 with open('out_data2.js', 'w') as f:
     f.write(f"""
 export const frameData = ["{all_frames}"];
+""")
+
+with open('frame_data.json', 'w') as f:
+    f.write(f"""
+["{all_frames}"]
 """)
 
 with open('raw_frame_data', 'wb') as f:
