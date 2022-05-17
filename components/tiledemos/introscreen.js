@@ -68,7 +68,7 @@ export class IntroScreen extends HTMLElement {
     this.setPalette([3, 3, 3, 3]);
     this.drawing.fromB64JSONGBData(kTilesIntroScreen);
     await this.fadeFromBlack();
-    await new Promise((res) => setTimeout(res, 5000));
+    await new Promise((res) => setTimeout(res, 3000));
     await this.fadeToWhite();
   }
 }

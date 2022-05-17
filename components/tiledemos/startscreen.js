@@ -106,10 +106,14 @@ export class StartScreen extends HTMLElement {
     offScreen.className = 'invis';
     
     this.drawing.fromB64JSONGBData(kWithArrow);//kStartScreen);
+    this.blankSelected();
+    this.selected = 0;
+    this.arrowSelected();
     this.themeMusic.currentTime = 0;
     this.themeMusic.play();
     const selectionPromise =
       new Promise((res, rej) => this.selectionResolver = res);
+    this.timeoutTimer = setTimeout(() => this.aButton(), 10000);
     return selectionPromise;
   }
 
@@ -128,19 +132,22 @@ export class StartScreen extends HTMLElement {
       kPositions[this.selected].x, kPositions[this.selected].y);
   }
   upButton() {
+    if (this.timeoutTimer) clearTimeout(this.timeoutTimer);
     this.blankSelected()
     this.selected = Math.max(this.selected - 1, 0);
     this.arrowSelected();
   }
   downButton() {
+    if (this.timeoutTimer) clearTimeout(this.timeoutTimer);
     this.blankSelected()
     this.selected = Math.min(this.selected + 1, kPositions.length - 1);
     this.arrowSelected();
   }
   aButton() {
+    if (this.timeoutTimer) clearTimeout(this.timeoutTimer);
     this.selectSound.play();
     this.stopMusic();
-    const selection = kSelection.get(this.selection);
+    const selection = kSelection.get(this.selected);
     const fadePromise = this.fadeToBlack();
     this.selectionResolver?.call(null, {selection, fadePromise});
     return {selection, fadePromise};
