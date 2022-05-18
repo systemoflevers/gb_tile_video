@@ -125,12 +125,31 @@
         opacity: 0;
       }
     }
+
+    #play-button {
+      position: absolute;
+      z-index: 10;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.6;
+    }
+    #play-button[hidden] {
+      display: none;
+    }
+    #play-button > img {
+      height: 40%;
+      cursor: pointer;
+    }
   </style>
 </head>
 
 <body>
   <div id="loading"><div>loading <span id='loading-percent'>0</span>%</div></div>
   <demo-holder>
+    <div id="play-button" hidden><img src="play_button.png" alt="play button"></div>
     <startup-screen ></startup-screen>
     <start-screen hidden></start-screen>
     <intro-screen hidden></intro-screen>
@@ -169,7 +188,9 @@
 
     let waterAnimation = null;
     tile.addEventListener('ready', () => { waterAnimation = tile.getWaterAnimator() });
-    const audio = new Audio('maybe_real06_02.mp3');
+    const audio = new Audio('maybe_real06_04.mp3');
+    const clickOn = new Audio('click_on.mp3');
+    const clickOff = new Audio('click_off.mp3');
     //const themeMusic = new Audio('theme.mp3');
     //const selectSound = new Audio('select_sound.mp3');
 
@@ -186,6 +207,33 @@
     themeMusic.addEventListener('timeupdate', themeLooper);*/
     //audio.currentTime = 1000 * 1/30;
     let playing = false;
+
+    const start = async () => {
+      audio.currentTime = 4;
+      await clickOn.play();
+      await startup.start();
+      startup.hidden = true;
+      startScreen.hidden = false;
+      const {selection, fadePromise} = await startScreen.show();
+      await fadePromise;
+      startScreen.hidden = true;
+      if (selection === 'passcode') {
+        passcodeScreen.hidden = false;
+        await passcodeScreen.show();
+        passcodeScreen.hidden = true;
+      } 
+      introScreen.hidden = false;
+      await introScreen.show();
+      introScreen.hidden = true;
+      vid.hidden = false;
+      tile.setPalette([0,0,0,0]);
+      audio.play().then(() => vid.play(120));
+    }
+    const playButton = document.querySelector('#play-button > img');
+    playButton.addEventListener('click', () => {
+      playButton.parentElement.hidden = true;
+      setTimeout(start, 400);
+    });
     document.addEventListener('keydown', async (ev) => {
       if (ev.code !== 'Space') return;
       if (playing) {
@@ -201,37 +249,25 @@
     vid.loadingCallback = (received, total) =>loadingPercentContainer.replaceChildren(Math.floor(100 * received / total));
     const startFrame = Math.floor(Math.floor(0/30) * 30);
     const scenes = [
-      scene('start', async () => {
-        await startup.start();
-        startup.hidden = true;
-        startScreen.hidden = false;
-        const {selection, fadePromise} = await startScreen.show();
-        await fadePromise;
-        startScreen.hidden = true;
-        if (selection === 'passcode') {
-          passcodeScreen.hidden = false;
-          await passcodeScreen.show();
-          passcodeScreen.hidden = true;
-        } 
-        introScreen.hidden = false;
-        await introScreen.show();
-        introScreen.hidden = true;
-        vid.hidden = false;
-        audio.play().then(() => vid.play());
-      }),
+      scene('start', start),
       scene('skip', () => {
         startup.hidden = true;
+        playButton.parentElement.hidden = true;
         vid.hidden = false;
       }),
       scene('play', () => {
-        audio.currentTime = Math.floor(startFrame /30);
+        //audio.currentTime = Math.floor(startFrame /30);
         /*audio.addEventListener('timeupdate', () => {
           const frame = Math.round(audio.currentTime * 30);
           console.log(audio.currentTime, vid.lastFrame, frame);
           //vid.sync(frame);
         });*/
         //console.log(audio.duration);
-        audio.play().then(() => vid.play(startFrame));
+        //audio.play().then(() => vid.play(startFrame));
+
+        tile.setPalette([0,0,0,0]);
+        audio.currentTime = 4;
+        audio.play().then(() => vid.play(120));//144));
         //vid.play();
       }),
       scene('pause', async () => {
@@ -451,6 +487,9 @@
       }),
       scene('off', async () => {
         await audio.pause();
+        await clickOff.play();
+        vid.hidden = true;
+        vid.pause();
         offScreen.hidden = false;
         offScreen.turnOff();
       }),
@@ -465,7 +504,7 @@
       scene('disconnect tile vid', () => vid.oneTileFrameCallback = null),
     ];
     const events = [
-    [4, ["fade in", 142]],
+    [4, ["fade in", 138]],
     [5, ["explode", 600]],
     [6, ["unexplode", 788]],
     [93, ["connect tile vid", 800]],
@@ -554,10 +593,11 @@
     [88, ["full tile", 11860]],
     [89, ["hide zeros",11930]],
     [90, ["end talking", 12090]],
-    [91, ["off", 12432]],
+    [91, ["off", 12396]],
     ];
     vid.addEventListener('ready', () => {
       document.getElementById('loading').hidden = true;
+      playButton.parentElement.hidden = false;
       for (const e of events) {
         const scene = scenes[e[0]];
         vid.addEvent(e[1][1], () => {
@@ -578,6 +618,7 @@
     });
     const buttonContainer = document.getElementById('buttons');
     for (let i = 0; i < scenes.length; ++i) {
+      break;
       const s = scenes[i];
       const button = document.createElement('button');
       button.innerText = s.name;
